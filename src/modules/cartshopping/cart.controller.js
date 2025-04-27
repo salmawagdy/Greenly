@@ -4,9 +4,9 @@ import { authentication,authorization } from "../../middleware/auth.middleware.j
 import { endpoint } from "./cart.authorization.js";
 const router = Router();
 
-router.post("/addtocart", authentication,authorization(endpoint.addToCart),cartServices.addToCart);
-router.get("/getcart", authentication,authorization(endpoint.addToCart) ,cartServices.getCart);
-router.put("/updatecart", authentication,authorization(endpoint.addToCart) ,cartServices.updateCart);
-router.delete("/deletecart/productId", authentication,authorization(endpoint.addToCart) ,cartServices.deleteCart);
+router.post("/addtocart", authentication(),authorization(endpoint.addToCart),cartServices.addToCart);
+router.get("/getcart", authentication(),authorization(endpoint.addToCart) ,cartServices.getCart);
+router.put("/updatecart", authentication(),authorization(endpoint.addToCart) ,cartServices.updateCart);
+router.delete("/deletecart/productId", authentication(),authorization(endpoint.addToCart) ,cartServices.deleteCart);
 
 export default router;

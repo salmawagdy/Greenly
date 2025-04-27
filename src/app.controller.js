@@ -7,6 +7,7 @@ import productRouter from "./modules/product/product.controller.js";
 import categoryRouter from "./modules/category/category.controller.js";
 import subCategoryRouter from "./modules/subCategories/subCategories.controller.js";
 import cartRouter from "./modules/cartshopping/cart.controller.js";
+import wishlist from "./modules/wishList/wishList.controller.js"
 import { globalErrorHandling } from "./utilis/response/error.response.js"
 
 
@@ -22,6 +23,7 @@ const bootstrap = async (app, express) => {
   app.use("/blog",blogController)
   app.use("/license",licenseController)
   app.use("/cart", cartRouter);
+  app.use("/wishlist", wishlist);
   app.use(globalErrorHandling)
   await connectDB();
 };
