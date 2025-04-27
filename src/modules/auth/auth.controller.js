@@ -7,7 +7,6 @@ const router = Router();
 
 
 
-
 router.post('/signup',validation(validators.signup),registration.signup)
 router.patch('/confirm-email',validation(validators.confirmEmail),registration.confirmEmail)
 router.post('/login',validation(validators.login),login.login)

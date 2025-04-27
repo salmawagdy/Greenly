@@ -28,7 +28,7 @@ const userSchema = new Schema ({
     },
     resetPasswordOTP:String,
     phone:String,
-    age:String,
+    age:Number,
     
     confirmEmail:{
         type:Boolean,
