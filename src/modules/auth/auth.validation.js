@@ -30,7 +30,6 @@ export const forgetPassword = joi.object().keys({
 
 export const resetPassword = joi.object().keys({
     email:generalFields.email.required(),
-    code:generalFields.code.required(),
     password: generalFields.password.required(),
     confirmPassword:generalFields.confirmPassword.required(),
 }).required()

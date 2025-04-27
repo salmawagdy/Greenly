@@ -74,7 +74,7 @@ if(!compareHash({plainText: code , hashValue: user.resetPasswordOTP})) {
 })
 
 export const resetPassword  = asyncHandler(async(req,res,next)=>{
-    const {email,code,password}=req.body;
+    const {email,password}=req.body;
     const user = await userModel.findOne({email})
     if (!user){
         return next (new Error('In-valid account',{cause:404}))
@@ -83,10 +83,10 @@ export const resetPassword  = asyncHandler(async(req,res,next)=>{
         return next (new Error('Please verify your email first',{cause:404}))
     }
 
-if(!compareHash({plainText: code , hashValue: user.resetPasswordOTP})) {
+// if(!compareHash({plainText: code , hashValue: user.resetPasswordOTP})) {
 
-    return next (new Error("In-valid reset OTP", {cause:400}))
-}
+//     return next (new Error("In-valid reset OTP", {cause:400}))
+// }
 
 await userModel.updateOne({email},{
     password: generateHash({plainText:password}),
