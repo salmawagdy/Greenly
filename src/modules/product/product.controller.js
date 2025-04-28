@@ -5,7 +5,7 @@ import * as productServices from "./services/product.services.js";
 import { uploadProductImages } from '../../utilis/multer/local.multer.js'
 const router = Router();
 
-router.get("/products-by-category", productServices.getProductByCategory);
+router.get("/products-by-category/:id", productServices.getProductByCategoryId);
 router.get("/allproducts",  productServices.getProduct);
 router.post("/addproduct",authentication(),authorization(endpoint.addProduct),uploadProductImages, productServices.createProduct);
 router.get("/:id", productServices.getProductById);

@@ -99,45 +99,38 @@ export const updateProduct = async (req, res) => {
 };
 
 
-export const getProductByCategory = async (req, res) => {
+export const getProductByCategoryId = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const { id } = req.params;
 
-    if (!categories || categories.length === 0) {
-      return res.status(404).json({ message: "No categories found." });
+    const category = await Category.findById(id);
+    if (!category) {
+      return res.status(404).json({ message: "Category not found." });
     }
 
-    const result = [];
+    const subCategories = await SubCategory.find({ categoryid: id });
 
-    for (let category of categories) {
-      const subCategories = await SubCategory.find({ categoryid: category._id });
+    const subCategoryWithProducts = await Promise.all(subCategories.map(async (subCategory) => {
+      const products = await Product.find({ subCategory: subCategory._id })
+        .populate('category', 'name')
+        .populate('subCategory', 'name');
 
-      const subCategoryWithProducts = [];
-      for (let subCategory of subCategories) {
-        const products = await Product.find({ subCategory: subCategory._id })
-          .populate('category', 'name')
-          .populate('subCategory', 'name');
-        
-        subCategoryWithProducts.push({
-          subCategoryId: subCategory._id,
-          subCategoryName: subCategory.name,
-          products
-        });
-      }
+      return {
+        subCategoryId: subCategory._id,
+        subCategoryName: subCategory.name,
+        products
+      };
+    }));
 
-      result.push({
-        categoryId: category._id,
-        categoryName: category.name,
-        subCategories: subCategoryWithProducts
-      });
-    }
+    const result = {
+      categoryId: category._id,
+      categoryName: category.name,
+      subCategories: subCategoryWithProducts
+    };
 
     res.status(200).json(result);
-
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
-
-
-
