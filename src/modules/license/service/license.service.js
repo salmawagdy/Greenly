@@ -96,7 +96,7 @@ export const updateLicenseStatus = async (req, res) => {
             return res.status(404).json({ message: 'License request not found' });
         }
 
-        return res.status(200).json({ message: "License status updated successfully", data: updatedLicense });
+        return res.status(200).json({ message: "License request status updated successfully", data: updatedLicense });
 
     } catch (error) {
         return res.status(500).json({ message: 'Server error', error: error.message });
