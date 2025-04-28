@@ -1,19 +1,21 @@
 import cart from "../../../DB/model/cartShopping.model.js";
-import product from "../../../DB/model/product.model.js";
+import Product from "../../../DB/model/product.model.js";
 import jwt from "jsonwebtoken";
 
 // export const addToCart = async (req, res) => {
 //   try {
-//     const { productId, quantity } = req.body;
-//     if (!req.user || !req.user.id) {
+//     const { productId } = req.body;
+
+//     if (!req.user || !req.user._id) {
 //       return res.status(401).json({ message: "User not authenticated" });
 //     }
+
 //     const userId = req.user._id;
 
-//     if (!productId || !quantity) {
+//     if (!productId) {
 //       return res
 //         .status(400)
-//         .json({ message: "Product ID and quantity are required" });
+//         .json({ message: "Product ID is required" });
 //     }
 
 //     const productToAdd = await product.findById(productId);
@@ -23,21 +25,35 @@ import jwt from "jsonwebtoken";
 
 //     const cartItem = {
 //       productId,
-//       quantity,
+//       quantity: 1,
 //       price: productToAdd.price,
-//       };
+//     };
 
-//     const existingCart = await cart.findOne({ userId });
+//     let userCart = await cart.findOne({ userId, status: "active" }).populate(
+//       "products.productId"
+//     )
 
-//     if (existingCart) {
-//       existingCart.products.push(cartItem);
-//       await existingCart.save();
+//     if (!userCart) {
+//       userCart = new cart({
+//         userId,
+//         products: [cartItem],
+//       });
 //     } else {
-//       const newCart = new cart({ userId, products: [cartItem] });
-//       await newCart.save();
+//       const existingProduct = userCart.products.find((p) =>
+//         p.productId.equals(productId)
+//       );
+
+//       if (existingProduct) {
+//         existingProduct.quantity += 1;
+//       } else {
+//         userCart.products.push(cartItem);
+//       }
 //     }
 
-//     res.status(200).json({ message: "Product added to cart successfully" });
+//     await userCart.save();
+//     res
+//       .status(200)
+//       .json({ message: "Product added to cart successfully", cart: userCart });
 //   } catch (error) {
 //     console.error("Error adding to cart:", error);
 //     res.status(500).json({ message: error.message });
@@ -46,76 +62,59 @@ import jwt from "jsonwebtoken";
 export const addToCart = async (req, res) => {
   try {
     const { productId } = req.body;
+    const product = await Product.findById(productId);
 
-    if (!req.user || !req.user._id) {
-      return res.status(401).json({ message: "User not authenticated" });
-    }
-
-    const userId = req.user._id;
-
-    if (!productId) {
-      return res
-        .status(400)
-        .json({ message: "Product ID is required" });
-    }
-
-    const productToAdd = await product.findById(productId);
-    if (!productToAdd) {
+    if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const cartItem = {
-      productId,
-      quantity: 1,
-      price: productToAdd.price,
-    };
+    let Cart = await cart.findOne({ userId: req.user._id, status: "active" });
 
-    let userCart = await cart.findOne({ userId, status: "active" });
+    if (!Cart) {
+      Cart = await cart.create({
+        userId: req.user._id,
 
-    if (!userCart) {
-      userCart = new cart({
-        userId,
-        products: [cartItem],
+        products: [],
+        totalPrice: 0,
+        status: "active",
       });
-    } else {
-      const existingProduct = userCart.products.find((p) =>
-        p.productId.equals(productId)
-      );
-
-      if (existingProduct) {
-        existingProduct.quantity += 1;
-      } else {
-        userCart.products.push(cartItem);
-      }
     }
 
-    await userCart.save();
-    res
-      .status(200)
-      .json({ message: "Product added to cart successfully", cart: userCart });
+    const existingProductIndex = Cart.products.findIndex(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (existingProductIndex > -1) {
+      Cart.products[existingProductIndex].quantity += 1;
+    } else {
+      Cart.products.push({
+        productId: product._id,
+        quantity: 1,
+        price: product.price,
+      });
+    }
+
+    Cart.totalPrice = Cart.products.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+
+    await Cart.save();
+
+    await Cart.populate({
+      path: "products.productId",
+      select:
+        "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
+    });
+
+    res.status(200).json(Cart);
   } catch (error) {
-    console.error("Error adding to cart:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const getCart = async (req, res) => {
   try {
-    // Get the token from the Authorization header
-    //const token = req.headers.authorization?.split(" ")[1];
-
-    //if (!token) {
-    //  return res.status(401).json({ message: "No token provided, authorization required" });
-    // }
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Extract userId from the decoded token
-    // const userId = decoded._id;
-
-    // if (!userId) {
-    //   return res.status(400).json({ message: "User ID not found in token" });
-    // }
-    
     const cartItems = await cart
       .findOne({ userId: req.user._id, status: "active" })
       .populate("products.productId");
@@ -128,26 +127,26 @@ export const getCart = async (req, res) => {
   }
 };
 
-export const updateCart = async (req, res) => {
-  try {
-    const { productId, quantity } = req.body;
-    const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
+// export const updateCart = async (req, res) => {
+//   try {
+//     const { productId, quantity } = req.body;
+//     const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
 
-    if (!Cart) return res.status(404).json({ message: "Cart not found" });
+//     if (!Cart) return res.status(404).json({ message: "Cart not found" });
 
-    const item = Cart.products.find(
-      (p) => p.productId.toString() === productId
-    );
-    if (!item) return res.status(404).json({ message: "Product not in cart" });
+//     const item = Cart.products.find(
+//       (p) => p.productId.toString() === productId
+//     );
+//     if (!item) return res.status(404).json({ message: "Product not in cart" });
 
-    item.quantity = quantity;
-    await Cart.save();
+//     item.quantity = quantity;
+//     await Cart.save();
 
-    res.json({ message: "Cart updated", Cart });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+//     res.json({ message: "Cart updated", Cart });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
 export const deleteCart = async (req, res) => {
   try {
@@ -164,6 +163,52 @@ export const deleteCart = async (req, res) => {
     res.json({ message: "Product removed from cart", Cart });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+  
+};
+
+export const updateCart = async (req, res) => {
+  try {
+    const { productId, quantity } = req.body;
+
+    const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
+
+    if (!Cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const productInCart = Cart.products.find(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (!productInCart) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    if (quantity <= 0) {
+      Cart.products = Cart.products.filter(
+        (item) => item.productId.toString() !== productId
+      );
+    } else {
+      productInCart.quantity = quantity;
+    }
+
+    Cart.totalPrice = Cart.products.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+
+    await Cart.save();
+
+    await Cart.populate({
+      path: "products.productId",
+      select:
+        "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
+    });
+
+    res.status(200).json(Cart);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
