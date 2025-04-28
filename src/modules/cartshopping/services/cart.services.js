@@ -45,7 +45,7 @@ import jwt from "jsonwebtoken";
 // };
 export const addToCart = async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId } = req.body;
 
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "User not authenticated" });
@@ -53,10 +53,10 @@ export const addToCart = async (req, res) => {
 
     const userId = req.user._id;
 
-    if (!productId || !quantity) {
+    if (!productId) {
       return res
         .status(400)
-        .json({ message: "Product ID and quantity are required" });
+        .json({ message: "Product ID is required" });
     }
 
     const productToAdd = await product.findById(productId);
@@ -66,7 +66,7 @@ export const addToCart = async (req, res) => {
 
     const cartItem = {
       productId,
-      quantity,
+      quantity: 1,
       price: productToAdd.price,
     };
 
@@ -83,7 +83,7 @@ export const addToCart = async (req, res) => {
       );
 
       if (existingProduct) {
-        existingProduct.quantity += quantity;
+        existingProduct.quantity += 1;
       } else {
         userCart.products.push(cartItem);
       }
@@ -102,22 +102,22 @@ export const addToCart = async (req, res) => {
 export const getCart = async (req, res) => {
   try {
     // Get the token from the Authorization header
-    const token = req.headers.authorization?.split(" ")[1];
+    //const token = req.headers.authorization?.split(" ")[1];
 
-    if (!token) {
-      return res.status(401).json({ message: "No token provided, authorization required" });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+    //if (!token) {
+    //  return res.status(401).json({ message: "No token provided, authorization required" });
+    // }
+    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     // Extract userId from the decoded token
-    const userId = decoded._id;
-    
-    if (!userId) {
-      return res.status(400).json({ message: "User ID not found in token" });
-    }
+    // const userId = decoded._id;
 
+    // if (!userId) {
+    //   return res.status(400).json({ message: "User ID not found in token" });
+    // }
+    
     const cartItems = await cart
-      .findOne({ userId })
+      .findOne({ userId: req.user._id, status: "active" })
       .populate("products.productId");
     if (!cartItems) {
       return res.status(404).json({ message: "Cart not found" });
@@ -166,3 +166,31 @@ export const deleteCart = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const clearCart = async (req, res) => {
+  try {
+    const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
+
+    if (!Cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    Cart.products = [];
+    Cart.totalPrice = 0;
+
+    await Cart.save();
+
+    res.status(200).json({ message: "Cart cleared successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+// export const clearCart = async (req, res) => {
+//   try {
+//     const Cart = await cart.findOneAndDelete({ userId: req.user._id, status: "active" });
+//     if (!Cart) return res.status(404).json({ message: "Cart not found" });
+//     res.json({ message: "Cart cleared", Cart });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
