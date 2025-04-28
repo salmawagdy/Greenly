@@ -13,6 +13,7 @@ export const createProduct = async (req, res) => {
       categoryid,
       subcategoryid,
       stock,
+      ratingAvg
     } = req.body
 
     const imageCover = req.files?.imageCover?.[0]?.path || null
@@ -45,6 +46,7 @@ export const createProduct = async (req, res) => {
       category: categoryid,
       subCategory: subcategoryid,
       stock,
+      ratingAvg,
       imageCover,
       images,
     })
