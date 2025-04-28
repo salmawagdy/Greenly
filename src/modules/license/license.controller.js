@@ -10,6 +10,7 @@ const router = Router();
 router.post('/requestLicense',authentication(),authorization(endpoint.request),uploadLicenseFiles,validation(validators.requestLicenseValidation), licenseServices.requestLicense)
 router.get('/getAllRequests',authentication(),authorization(endpoint.getRequests),licenseServices.getAllRequests)
 router.get('/:userId',authentication(),authorization(endpoint.request),licenseServices.getUserRequests)
+router.patch('/:licenseId',authentication(),authorization(endpoint.getRequests),licenseServices.updateLicenseStatus)
 
 
 export default router

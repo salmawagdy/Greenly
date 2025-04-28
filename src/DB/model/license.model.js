@@ -50,6 +50,11 @@ const LicenseSchema = new Schema({
         type: String,
         required: true,
     },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending',
+    },
     documents: {
         type: [String],
         required: true,
@@ -65,6 +70,7 @@ const LicenseSchema = new Schema({
         ref: "User",
         required: true,
     },
+    
 },
 { timestamps: true }
 );

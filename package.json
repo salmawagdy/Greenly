@@ -44,6 +44,8 @@
 
     "nanoid": "^5.1.5",
 
+    "ngrok": "^5.0.0-beta.2",
+
     "nodemailer": "^6.10.1",
 
     "stripe": "^18.0.0",

@@ -75,3 +75,30 @@ export const getUserRequests = async (req, res) => {
     return res.status(500).json({ message: error.message });
     }
 };
+
+
+export const updateLicenseStatus = async (req, res) => {
+    try {
+        const { licenseId } = req.params;
+        const { status } = req.body;
+
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status. Status must be either approved or rejected.' });
+        }
+
+        const updatedLicense = await LicenseModel.findByIdAndUpdate(
+            licenseId,
+            { status },
+            { new: true }
+        );
+
+        if (!updatedLicense) {
+            return res.status(404).json({ message: 'License request not found' });
+        }
+
+        return res.status(200).json({ message: "License status updated successfully", data: updatedLicense });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
