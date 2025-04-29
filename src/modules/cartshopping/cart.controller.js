@@ -33,8 +33,10 @@ router.delete(
 );
 router.delete(
   "/clearcart",
+
   authentication(),
   authorization(endpoint.addToCart),
+
   cartServices.clearCart
 );
 

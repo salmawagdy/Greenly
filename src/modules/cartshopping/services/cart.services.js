@@ -2,63 +2,6 @@ import cart from "../../../DB/model/cartShopping.model.js";
 import Product from "../../../DB/model/product.model.js";
 import jwt from "jsonwebtoken";
 
-// export const addToCart = async (req, res) => {
-//   try {
-//     const { productId } = req.body;
-
-//     if (!req.user || !req.user._id) {
-//       return res.status(401).json({ message: "User not authenticated" });
-//     }
-
-//     const userId = req.user._id;
-
-//     if (!productId) {
-//       return res
-//         .status(400)
-//         .json({ message: "Product ID is required" });
-//     }
-
-//     const productToAdd = await product.findById(productId);
-//     if (!productToAdd) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-
-//     const cartItem = {
-//       productId,
-//       quantity: 1,
-//       price: productToAdd.price,
-//     };
-
-//     let userCart = await cart.findOne({ userId, status: "active" }).populate(
-//       "products.productId"
-//     )
-
-//     if (!userCart) {
-//       userCart = new cart({
-//         userId,
-//         products: [cartItem],
-//       });
-//     } else {
-//       const existingProduct = userCart.products.find((p) =>
-//         p.productId.equals(productId)
-//       );
-
-//       if (existingProduct) {
-//         existingProduct.quantity += 1;
-//       } else {
-//         userCart.products.push(cartItem);
-//       }
-//     }
-
-//     await userCart.save();
-//     res
-//       .status(200)
-//       .json({ message: "Product added to cart successfully", cart: userCart });
-//   } catch (error) {
-//     console.error("Error adding to cart:", error);
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 export const addToCart = async (req, res) => {
   try {
     const { productId } = req.body;
@@ -126,27 +69,6 @@ export const getCart = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// export const updateCart = async (req, res) => {
-//   try {
-//     const { productId, quantity } = req.body;
-//     const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
-
-//     if (!Cart) return res.status(404).json({ message: "Cart not found" });
-
-//     const item = Cart.products.find(
-//       (p) => p.productId.toString() === productId
-//     );
-//     if (!item) return res.status(404).json({ message: "Product not in cart" });
-
-//     item.quantity = quantity;
-//     await Cart.save();
-
-//     res.json({ message: "Cart updated", Cart });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 
 export const deleteCart = async (req, res) => {
   try {
@@ -216,41 +138,29 @@ export const updateCart = async (req, res) => {
   }
 };
 
-// export const clearCart = async (req, res) => {
-//   try {
-//     const updatedCart = await cart.findOneAndUpdate(
-//       { userId: req.user._id, status: "active" },
-//       { $set: { products: [], totalPrice: 0 } },
-//       { new: true }
-//     );
 
-//     if (!updatedCart) {
-//       return res.status(404).json({ message: "Cart not found" });
-//     }
-
-//     res.status(200).json({
-//       message: "Cart cleared successfully",
-//       updatedCart,
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 export const clearCart = async (req, res) => {
   try {
-    const updatedCart = await cart.findOneAndUpdate(
-      { userId: req.user._id, status: "active" },
-      { $set: { products: [], totalPrice: 0 } },
-      { new: true }
-    );
+    const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
 
-    if (!updatedCart) {
+    if (!Cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
+    // نفس فكرة filter، بس نفرّغ المنتجات كلها
+    Cart.products = [];
+
+    // نحدث السعر
+    Cart.totalPrice = 0;
+
+    // نعلم Mongoose إن المنتجات اتعدلت يدويًا
+    Cart.markModified("products");
+
+    await Cart.save();
+
     res.status(200).json({
-      message: "Cart cleared successfully",
-      updatedCart,
+      message: "All products removed from cart",
+      cart: Cart,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
