@@ -20,7 +20,7 @@ router.get(
   wishlistServices.getWishlist
 );
 router.delete(
-  "/deletewishlist/productId",
+  "/:productId",
   authentication(),
   authorization(endpoint.favPage),
   wishlistServices.removeFromWishlist

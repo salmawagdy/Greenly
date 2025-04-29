@@ -164,7 +164,6 @@ export const deleteCart = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  
 };
 
 export const updateCart = async (req, res) => {
@@ -214,22 +213,42 @@ export const updateCart = async (req, res) => {
 
 export const clearCart = async (req, res) => {
   try {
-    const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
+    const updatedCart = await cart.findOneAndUpdate(
+      { userId: req.user._id, status: "active" },
+      { $set: { products: [], totalPrice: 0 } },
+      { new: true }
+    );
 
-    if (!Cart) {
+    if (!updatedCart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    Cart.products = [];
-    Cart.totalPrice = 0;
-
-    await Cart.save();
-
-    res.status(200).json({ message: "Cart cleared successfully" });
+    res.status(200).json({
+      message: "Cart cleared successfully",
+       updatedCart,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+// export const clearCart = async (req, res) => {
+//   try {
+//     const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
+
+//     if (!Cart) {
+//       return res.status(404).json({ message: "Cart not found" });
+//     }
+
+//     Cart.products = [];
+//     Cart.totalPrice = 0;
+
+//     await Cart.save();
+
+//     res.status(200).json({ message: "Cart cleared successfully" });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 // export const clearCart = async (req, res) => {
 //   try {
 //     const Cart = await cart.findOneAndDelete({ userId: req.user._id, status: "active" });

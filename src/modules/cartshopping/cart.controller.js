@@ -13,7 +13,12 @@ router.post(
   authorization(endpoint.addToCart),
   cartServices.addToCart
 );
-router.get("/getcart", authentication(),authorization(endpoint.addToCart), cartServices.getCart);
+router.get(
+  "/getcart",
+  authentication(),
+  authorization(endpoint.addToCart),
+  cartServices.getCart
+);
 router.put(
   "/updatecart",
   authentication(),
@@ -27,7 +32,8 @@ router.delete(
   cartServices.deleteCart
 );
 router.delete(
-  "/clearcart", authentication(),
+  "/clearcart",
+  authentication(),
   authorization(endpoint.addToCart),
   cartServices.clearCart
 );
