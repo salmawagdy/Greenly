@@ -26,16 +26,17 @@ router.put(
   cartServices.updateCart
 );
 router.delete(
-  "/:productId",
-  authentication(),
-  authorization(endpoint.removecart),
-  cartServices.deleteCart
-);
-router.delete(
   "/clearCart",
   authentication(),
   authorization(endpoint.clearcart),
   cartServices.clearCart
+);
+
+router.delete(
+  "/:productId",
+  authentication(),
+  authorization(endpoint.removecart),
+  cartServices.deleteCart
 );
 
 export default router;

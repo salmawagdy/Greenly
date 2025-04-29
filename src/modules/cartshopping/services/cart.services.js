@@ -191,10 +191,7 @@ export const clearCart = async (req, res) => {
 
     await Cart.save();
 
-    res.status(200).json({
-      message: "Cart cleared successfully",
-      cart: Cart,
-    });
+    res.status(200).json(Cart);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
