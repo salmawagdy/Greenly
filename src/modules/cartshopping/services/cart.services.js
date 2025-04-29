@@ -70,23 +70,63 @@ export const getCart = async (req, res) => {
   }
 };
 
+// export const deleteCart = async (req, res) => {
+//   try {
+//     const { productId } = req.params;
+//     const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
+
+//     if (!Cart) return res.status(404).json({ message: "Cart not found" });
+
+//     Cart.products = Cart.products.filter(
+//       (p) => p.productId.toString() !== productId
+//     );
+
+//     await Cart.save();
+//     await Cart.populate({
+//       path: "products.productId",
+//       select:
+//         "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
+//     });
+//     res.json(Cart);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 export const deleteCart = async (req, res) => {
   try {
     const { productId } = req.params;
     const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
 
-    if (!Cart) return res.status(404).json({ message: "Cart not found" });
+    if (!Cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const productExists = Cart.products.some(
+      (p) => p.productId.toString() === productId
+    );
+
+    if (!productExists) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
 
     Cart.products = Cart.products.filter(
       (p) => p.productId.toString() !== productId
     );
 
+    // تحديث السعر بعد الحذف
+    Cart.totalPrice = Cart.products.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+
     await Cart.save();
+
     await Cart.populate({
       path: "products.productId",
       select:
         "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
     });
+
     res.json(Cart);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -138,7 +178,6 @@ export const updateCart = async (req, res) => {
   }
 };
 
-
 export const clearCart = async (req, res) => {
   try {
     const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
@@ -147,19 +186,13 @@ export const clearCart = async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // نفس فكرة filter، بس نفرّغ المنتجات كلها
     Cart.products = [];
-
-    // نحدث السعر
     Cart.totalPrice = 0;
-
-    // نعلم Mongoose إن المنتجات اتعدلت يدويًا
-    Cart.markModified("products");
 
     await Cart.save();
 
     res.status(200).json({
-      message: "All products removed from cart",
+      message: "Cart cleared successfully",
       cart: Cart,
     });
   } catch (err) {

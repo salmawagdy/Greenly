@@ -28,15 +28,13 @@ router.put(
 router.delete(
   "/:productId",
   authentication(),
-  authorization(endpoint.addToCart),
+  authorization(endpoint.removecart),
   cartServices.deleteCart
 );
 router.delete(
-  "/clearcart",
-
+  "/clearCart",
   authentication(),
-  authorization(endpoint.addToCart),
-
+  authorization(endpoint.clearcart),
   cartServices.clearCart
 );
 
