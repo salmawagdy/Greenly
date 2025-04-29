@@ -158,8 +158,13 @@ export const deleteCart = async (req, res) => {
     Cart.products = Cart.products.filter(
       (p) => p.productId.toString() !== productId
     );
-    await Cart.save();
 
+    await Cart.save();
+    await Cart.populate({
+      path: "products.productId",
+      select:
+        "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
+    });
     res.json(Cart);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -250,4 +255,4 @@ export const clearCart = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-}
+};
