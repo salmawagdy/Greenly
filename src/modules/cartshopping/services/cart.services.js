@@ -50,7 +50,7 @@ export const addToCart = async (req, res) => {
         "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
     });
 
-    res.status(200).json(Cart);
+    res.status(200).json(  Cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
