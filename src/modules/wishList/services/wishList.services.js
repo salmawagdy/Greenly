@@ -35,15 +35,20 @@ export const getWishlist = async (req, res) => {
     const wishlist = await Wishlist.findOne({ userId: req.user._id }).populate(
       "products.productId"
     );
-
-    wishlist.products = wishlist.products.filter((p) => p.productId !== null);
-    if (wishlist.products.length === 0) {
-      return res.status(404).json({ message: "Wishlist is empty" });
-    }
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
     }
 
+    if(wishlist.products.length === 0 || !wishlist.products){
+      wishlist.products = []
+    }
+    else {
+      wishlist.products = wishlist.products.filter((p) => p.productId !== null);
+    }
+
+    
+   
+  
     res
       .status(200)
       .json({ message: "Wishlist retrieved successfully", wishlist });
