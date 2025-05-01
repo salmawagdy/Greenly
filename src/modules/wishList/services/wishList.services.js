@@ -37,6 +37,9 @@ export const getWishlist = async (req, res) => {
     );
 
     wishlist.products = wishlist.products.filter((p) => p.productId !== null);
+    if (wishlist.products.length === 0) {
+      return res.status(404).json({ message: "Wishlist is empty" });
+    }
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
     }
