@@ -23,11 +23,11 @@ const LicenseSchema = new Schema({
         required: true,
     },
     experience: {
-        type: String,
+        type: Number,
         required: true,
     },
     requiredArea: {
-        type: String,
+        type: Number,
         required: true,
     },
     requiredLocation: {
@@ -39,7 +39,7 @@ const LicenseSchema = new Schema({
         required: true,
     },
     numberOfColonies: {
-        type: String,
+        type: Number,
         required: true,
     },
     workPlan: {
