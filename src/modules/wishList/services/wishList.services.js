@@ -32,11 +32,14 @@ export const addToWishlist = async (req, res) => {
 
 export const getWishlist = async (req, res) => {
   try {
-    const wishlist = await Wishlist.findOne({ userId: req.user._id }).populate(
+    let wishlist = await Wishlist.findOne({ userId: req.user._id }).populate(
       "products.productId"
     );
     if (!wishlist) {
-      return res.status(404).json({ message: "Wishlist not found" });
+       wishlist = new Wishlist({ userId: req.user._id, products: [] });
+      await wishlist.save();
+      res.status(200).json({ message: "Wishlist", wishlist });
+     
     }
 
     if(wishlist.products.length === 0 || !wishlist.products){
