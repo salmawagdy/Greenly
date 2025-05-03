@@ -43,18 +43,35 @@ export const deletePost = asyncHandler(async (req, res, next) => {
         return res.status(404).json({ message: "Post not found" });
     }
 
-    if (req.user.role === roleTypes.admin || post.createdBy.toString() === req.user._id.toString()) {
-        await blogModel.findByIdAndDelete(postId);  // Permanently delete the post from the database
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const isAdmin = req.user.role === roleTypes.admin;
+    const isOwner = post.createdBy.toString() === req.user._id.toString();
+
+    if (isAdmin || isOwner) {
+        await post.deleteOne();
+
+        // Fetch blogs according to role
+        const blogs = isAdmin
+            ? await blogModel.find()
+            : await blogModel.find({ createdBy: req.user._id });
 
         return successResponse({
             res,
             status: 200,
-            message: "Post deleted successfully"
+            message: "Post deleted successfully",
+            data: blogs,
         });
     } else {
-        return res.status(403).json({ message: "You are not authorized to delete this post" });
+        return res.status(403).json({ 
+            message: "You are not authorized to delete this post",
+            data: { post }
+        });
     }
 });
+
 
 
 
@@ -63,7 +80,7 @@ export const getAllPosts = asyncHandler(async (req, res, next) => {
     return successResponse({
     res,
     status: 200,
-    data: { posts },
+    data: posts,
     });
 });
 
@@ -76,6 +93,6 @@ export const getUserPosts = asyncHandler(async (req, res, next) => {
     return successResponse({
     res,
     status: 200,
-    data: { posts },
+    data: posts,
     });
 });
