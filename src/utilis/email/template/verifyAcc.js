@@ -139,7 +139,7 @@ export const verifyAcc = ({code}={})=>{
         <p>To complete your registration, please use the verification code below:</p>
       </div>
       
-      <div class="verification-code">1234</div>
+      <div class="verification-code">${code}</div>
       
       <div class="email-content">
         <p>This code will expire in 24 hours. If you didn't sign up for a Greenly account, you can safely ignore this email.</p>
