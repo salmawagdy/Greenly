@@ -10,6 +10,7 @@ router.get("/allproducts",  productServices.getProduct);
 router.post("/addproduct",authentication(),authorization(endpoint.addProduct),uploadProductImages, productServices.createProduct);
 router.get("/products-by-category/:id", productServices.getProductByCategoryId);
 router.get("/:id", productServices.getProductById);
-router.put("/:id",authentication(),authorization(endpoint.addProduct), productServices.updateProduct);
+router.put("/:id", authentication(), authorization(endpoint.addProduct), productServices.updateProduct);
+router.delete("/:id", authentication(), authorization(endpoint.addProduct), productServices.deleteProduct);
 
 export default router;

@@ -1,7 +1,6 @@
 import Product from "../../../DB/model/product.model.js";
-import Category from "../../../DB/model/category.model.js"
-import SubCategory from "../../../DB/model/subCategories.model.js"
-
+import Category from "../../../DB/model/category.model.js";
+import SubCategory from "../../../DB/model/subCategories.model.js";
 
 export const createProduct = async (req, res) => {
   try {
@@ -13,29 +12,29 @@ export const createProduct = async (req, res) => {
       categoryid,
       subcategoryid,
       stock,
-      ratingAvg
-    } = req.body
+      ratingAvg,
+    } = req.body;
 
-    const imageCover = req.files?.imageCover?.[0]?.path || null
-    const images = req.files?.images?.map(file => file.path) || []
+    const imageCover = req.files?.imageCover?.[0]?.path || null;
+    const images = req.files?.images?.map((file) => file.path) || [];
 
     if (!name || !price || !categoryid || !subcategoryid) {
-      return res.status(400).json({ message: 'Missing required fields' })
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const categoryExists = await Category.findById(categoryid)
+    const categoryExists = await Category.findById(categoryid);
     if (!categoryExists) {
-      return res.status(404).json({ message: 'Category not found' })
+      return res.status(404).json({ message: "Category not found" });
     }
 
-    const subCategoryExists = await SubCategory.findById(subcategoryid)
+    const subCategoryExists = await SubCategory.findById(subcategoryid);
     if (!subCategoryExists) {
-      return res.status(400).json({ message: 'Invalid Subcategory ID' })
+      return res.status(400).json({ message: "Invalid Subcategory ID" });
     }
 
-    const productExists = await Product.findOne({ name })
+    const productExists = await Product.findOne({ name });
     if (productExists) {
-      return res.status(400).json({ message: 'Product already exists' })
+      return res.status(400).json({ message: "Product already exists" });
     }
 
     const product = new Product({
@@ -49,17 +48,16 @@ export const createProduct = async (req, res) => {
       ratingAvg,
       imageCover,
       images,
-    })
+    });
 
-    await product.save()
+    await product.save();
 
     return res.status(201).json( product )
 
   } catch (error) {
-    return res.status(400).json({ message: error.message })
+    return res.status(400).json({ message: error.message });
   }
-}
-
+};
 
 export const getProduct = async (req, res) => {
   try {
@@ -94,12 +92,11 @@ export const updateProduct = async (req, res) => {
 
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    res.status(200).json(product);
+    res.status(200).json({ message: "Product updated successfully", product });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 export const getProductByCategoryId = async (req, res) => {
   try {
@@ -112,27 +109,41 @@ export const getProductByCategoryId = async (req, res) => {
 
     const subCategories = await SubCategory.find({ categoryid: id });
 
-    const subCategoryWithProducts = await Promise.all(subCategories.map(async (subCategory) => {
-      const products = await Product.find({ subCategory: subCategory._id })
-        .populate('category', 'name')
-        .populate('subCategory', 'name');
+    const subCategoryWithProducts = await Promise.all(
+      subCategories.map(async (subCategory) => {
+        const products = await Product.find({ subCategory: subCategory._id })
+          .populate("category", "name")
+          .populate("subCategory", "name");
 
-      return {
-        subCategoryId: subCategory._id,
-        subCategoryName: subCategory.name,
-        products
-      };
-    }));
+        return {
+          subCategoryId: subCategory._id,
+          subCategoryName: subCategory.name,
+          products,
+        };
+      })
+    );
 
     const result = {
       categoryId: category._id,
       categoryName: category.name,
-      subCategories: subCategoryWithProducts
+      subCategories: subCategoryWithProducts,
     };
 
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    res.status(200).json({ message: "Product deleted successfully", product });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };

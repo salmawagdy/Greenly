@@ -2,8 +2,8 @@ import Category from "../../../DB/model/category.model.js";
 
 export const createCategory = async (req, res) => {
   try {
-    const { name, description, image } = req.body;
-    const newCategory = new Category({ name, description, image });
+    const { name, description } = req.body;
+    const newCategory = new Category({ name, description});
     await newCategory.save();
     res.status(201).json(newCategory);
   } catch (error) {
