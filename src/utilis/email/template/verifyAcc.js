@@ -134,7 +134,9 @@ export const verifyAcc = ({code}={})=>{
     <div class="email-body">
       <div class="welcome-message">Welcome to Greenly!</div>
       <div>
-        <img src="https://i.postimg.cc/8z91gDQv/tree-svgrepo-com.png" alt="tree-img" width="70px" height="70px">
+      <span class="leaf-icon">🍃</span>
+      <span class="leaf-icon">🍃</span>
+      <span class="leaf-icon">🍃</span>
     </div>
 
       
@@ -148,8 +150,6 @@ export const verifyAcc = ({code}={})=>{
       <div class="email-content">
         <p>This code will expire in 24 hours. If you didn't sign up for a Greenly account, you can safely ignore this email.</p>
       </div>
-      
-      <a href="http://localhost:4200/app/system/confirm-code" class="button">Verify My Account</a>
       
       <div class="divider"></div>
       
