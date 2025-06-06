@@ -8,6 +8,7 @@ import categoryRouter from "./modules/category/category.controller.js";
 import subCategoryRouter from "./modules/subCategories/subCategories.controller.js";
 import cartRouter from "./modules/cartshopping/cart.controller.js";
 import wishlist from "./modules/wishList/wishList.controller.js";
+import payment from "./modules/payment/payment.controller.js"
 
 
 //import orderRouter from "./modules/order/order.controller.js";
@@ -27,11 +28,11 @@ const bootstrap = async (app, express) => {
   app.use("/license", licenseController);
   app.use("/cart", cartRouter);
   app.use("/wishlist", wishlist);
+ app.use("/payment",payment)
 
 
   //app.use("/order", orderRouter);
   // app.use("/api", webhookroute);
-
 
   app.use(globalErrorHandling);
   await connectDB();
