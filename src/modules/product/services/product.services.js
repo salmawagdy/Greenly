@@ -13,6 +13,7 @@ export const createProduct = async (req, res) => {
       subcategoryid,
       stock,
       ratingAvg,
+      vendor
     } = req.body;
 
     const imageCover = req.files?.imageCover?.[0]?.path || null;
@@ -48,6 +49,7 @@ export const createProduct = async (req, res) => {
       ratingAvg,
       imageCover,
       images,
+      vendor
     });
 
     await product.save();
@@ -88,11 +90,12 @@ export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
+      runvalidators:true
     });
 
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    res.status(200).json({ message: "Product updated successfully", product });
+    res.status(200).json(product);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -138,11 +141,17 @@ export const getProductByCategoryId = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
 
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    const deletedProduct = await Product.findByIdAndDelete(id);
 
-    res.status(200).json({ message: "Product deleted successfully", product });
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const allProducts = await Product.find();
+
+    res.status(200).json( allProducts);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

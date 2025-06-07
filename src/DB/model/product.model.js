@@ -18,6 +18,7 @@ const productSchema = new Schema(
     imageCover: { type: String },
     images: [{ type: String }],
     ratingAvg: { type: Number, default: 0 },
+    vendor:{type:String, required:true},
   },
   { timestamps: true }
 );
