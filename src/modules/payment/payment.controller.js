@@ -1,5 +1,5 @@
 import express from "express";
-import { createStripeOrder ,stripeWebhook } from "./services/payment.services.js";
+import { createCheckoutSession ,handleStripeWebhook } from "./services/payment.services.js";
 import {
   authentication,
   authorization,
@@ -7,14 +7,21 @@ import {
 import { endpoint } from "./payment.authorization.js";
 const router = express.Router();
 
+
 router.post(
   "/create-order",
   authentication(),
-  authorization(endpoint.paymentt),
-  createStripeOrder
-);
+  authorization(endpoint.paymentt),createCheckoutSession
+)
 
-router.post("/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+// router.post(
+//   "/create-order",
+//   authentication(),
+//   authorization(endpoint.paymentt),
+//   createStripeOrder
+// );
+
+ router.post("/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
 
 
 
