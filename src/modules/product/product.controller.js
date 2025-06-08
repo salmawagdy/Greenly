@@ -7,12 +7,16 @@ import {uploadCloudFile} from "../../utilis/multer/cloud.multer.js"
 const router = Router();
 
 
+router.get("/getCategoryBySubcategory/:categoryid",  productServices.getSubcategories);
 router.get("/allproducts",  productServices.getProduct);
 router.post("/addproduct",authentication(),authorization(endpoint.addProduct),uploadCloudFile.fields([
     { name: 'imageCover', maxCount: 1 },
-    { name: 'images', maxCount: 5 }
-  ]), productServices.createProduct);
+    { name: 'images', maxCount: 5 }]), productServices.createProduct);
+
+
 router.get("/products-by-category/:id", productServices.getProductByCategoryId);
+
+
 router.get("/:id", productServices.getProductById);
 router.put("/:id", authentication(), authorization(endpoint.addProduct), productServices.updateProduct);
 router.delete("/:id", authentication(), authorization(endpoint.addProduct), productServices.deleteProduct);

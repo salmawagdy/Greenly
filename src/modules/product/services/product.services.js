@@ -182,3 +182,20 @@ export const deleteProduct = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+export const getSubcategories = async (req, res) => {
+  try {
+    const { categoryid } = req.params;
+
+    if (!categoryid) {
+      return res.status(400).json({ message: "Category ID is required in params" });
+    }
+
+    const subcategories = await SubCategory.find({ categoryid: categoryid });
+
+    res.status(200).json( subcategories );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
