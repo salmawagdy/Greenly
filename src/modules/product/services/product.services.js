@@ -1,6 +1,7 @@
 import Product from "../../../DB/model/product.model.js";
 import Category from "../../../DB/model/category.model.js";
 import SubCategory from "../../../DB/model/subCategories.model.js";
+import { cloud } from "../../../utilis/multer/cloudinary.js";
 
 export const createProduct = async (req, res) => {
   try {
@@ -9,42 +10,65 @@ export const createProduct = async (req, res) => {
       longdescription,
       shortdescription,
       price,
-      categoryid,
-      subcategoryid,
+      categoryName,
+      subcategoryName,
       stock,
       ratingAvg,
-      
+      vendor
     } = req.body;
 
-    const imageCover = req.files?.imageCover?.[0]?.path || null;
-    const images = req.files?.images?.map((file) => file.path) || [];
-
-    if (!name || !price || !categoryid || !subcategoryid) {
+    // Validate required fields
+    if (!name || !price || !categoryName || !subcategoryName) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const categoryExists = await Category.findById(categoryid);
-    if (!categoryExists) {
+    // Find category and subcategory by name
+    const category = await Category.findOne({ name: categoryName });
+    if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const subCategoryExists = await SubCategory.findById(subcategoryid);
-    if (!subCategoryExists) {
-      return res.status(400).json({ message: "Invalid Subcategory ID" });
+    const subCategory = await SubCategory.findOne({ name: subcategoryName });
+    if (!subCategory) {
+      return res.status(400).json({ message: "Invalid Subcategory name" });
     }
 
+    // Check if product already exists
     const productExists = await Product.findOne({ name });
     if (productExists) {
       return res.status(400).json({ message: "Product already exists" });
     }
 
+    // Upload imageCover to Cloudinary
+    let imageCover = null;
+    if (req.files?.imageCover?.length) {
+      const uploaded = await cloud.uploader.upload(req.files.imageCover[0].path);
+      imageCover = uploaded.secure_url;
+    }
+
+    // Upload multiple images to Cloudinary
+    const images = [];
+    if (req.files?.images?.length) {
+      for (const file of req.files.images) {
+        const uploaded = await cloud.uploader.upload(file.path);
+        images.push(uploaded.secure_url);
+      }
+    }
+
+    // Create product with category/subcategory IDs and names
     const product = new Product({
       name,
       longdescription,
       shortdescription,
       price,
-      category: categoryid,
-      subCategory: subcategoryid,
+      category: {
+        _id: category._id,
+        name: category.name
+      },
+      subCategory: {
+        _id: subCategory._id,
+        name: subCategory.name
+      },
       stock,
       ratingAvg,
       imageCover,
@@ -54,12 +78,14 @@ export const createProduct = async (req, res) => {
 
     await product.save();
 
-    return res.status(201).json( product )
+    return res.status(201).json({ product });
 
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 };
+
+
 
 export const getProduct = async (req, res) => {
   try {

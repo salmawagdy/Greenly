@@ -8,12 +8,15 @@ const productSchema = new Schema(
     shortdescription: { type: String, min: 0, max: 200 },
     longdescription: { type: String, min: 0, max: 1000 },
     price: { type: Number, required: true, min: 0 },
-    category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
-    subCategory: {
-      type: Schema.Types.ObjectId,
-      ref: "subcategory",
-      required: true,
-    },
+    category: {
+  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+  name: { type: String }
+},
+subCategory: {
+  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' },
+  name: { type: String }
+}
+,
     stock: { type: Number, default: 0, min: 0 },
     imageCover: { type: String },
     images: [{ type: String }],
