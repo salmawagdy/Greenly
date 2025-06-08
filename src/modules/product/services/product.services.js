@@ -13,7 +13,7 @@ export const createProduct = async (req, res) => {
       subcategoryid,
       stock,
       ratingAvg,
-      vendor
+      
     } = req.body;
 
     const imageCover = req.files?.imageCover?.[0]?.path || null;
