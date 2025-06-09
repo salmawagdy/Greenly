@@ -12,15 +12,12 @@ router.post('/predict', authentication(), async (req, res) => {
     const formData = req.body.data;
 
 
-    console.log('User ID:', userId);
-    console.log('Form Data:', formData);
-
     if (!formData) {
       return res.status(400).json({ error: 'Missing form data' });
     }
 
     const status = await getLoanPrediction(formData);
-     console.log('Prediction status:', status);
+ 
 
     await loanModel.create({
       userId,
