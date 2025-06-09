@@ -2,38 +2,57 @@ import express from 'express';
 import { authentication } from '../../middleware/auth.middleware.js';
 import { getLoanPrediction } from './services/loan.service.js';
 import loanModel from '../../DB/model/loan.model.js';
+import mongoose from 'mongoose';
+
 const router = express.Router();
 
 router.post('/predict', authentication(), async (req, res) => {
   try {
     const userId = req.user._id;
-
-    // Expecting: { data: { Gender: "...", Married: "...", ... } }
     const formData = req.body.data;
 
-
-    if (!formData) {
-      return res.status(400).json({ error: 'Missing form data' });
+    if (!formData || typeof formData !== 'object') {
+      return res.status(400).json({ error: 'Missing or invalid form data' });
     }
 
-    const status = await getLoanPrediction(formData);
- 
+    // Check if user already applied this month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-    await loanModel.create({
+    const endOfMonth = new Date(startOfMonth);
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+
+    const existingRequest = await loanModel.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      createdAt: { $gte: startOfMonth, $lt: endOfMonth }
+    });
+
+    if (existingRequest) {
+      return res.status(409).json({ message: 'You can only apply once per month' });
+    }
+
+    // Predict loan status
+    const status = await getLoanPrediction(formData);
+
+    // Save the application
+    const newLoan = await loanModel.create({
       userId,
       inputData: formData,
       loanStatus: status
     });
 
-    res.json({
+    return res.status(201).json({
+      message: 'Loan prediction completed',
+      loanId: newLoan._id,
       userId,
       loan_status: status
     });
-  } catch (error) {
-  console.error('Prediction error:', error.stack || error);
-  res.status(500).json({ error: error.message || 'Failed to get prediction' });
-}
 
+  } catch (error) {
+    console.error('Prediction error:', error.stack || error);
+    return res.status(500).json({ error: error.message || 'Failed to get prediction' });
+  }
 });
 
 router.get('/status/:id', authentication(), async (req, res) => {
