@@ -1,19 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Types, model } from 'mongoose';
 
-const loanApplicationSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
-  Gender: String,
-  Married: String,
-  Dependents: String,
-  Education: String,
-  Self_Employed: String,
-  ApplicantIncome: Number,
-  CoApplicantIncome: Number,
-  LoanAmount: Number,
-  Loan_Amount_Term: Number,
-  Credit_History: Number,
-  Property_Area: String,
-  prediction: String // 'Approved' or 'Rejected'
+const loanSchema = new Schema({
+  userId: { type: Types.ObjectId, ref: 'user', required: true },
+  inputData: { type: Object, required: true },  // stores the raw form input JSON
+  loanStatus: { type: String, required: true }, // "Approved" or "Rejected"
 }, { timestamps: true });
 
-export default mongoose.model('LoanApplication', loanApplicationSchema);
+const loanModel = mongoose.models.loan || model('loan', loanSchema);
+
+export default loanModel;

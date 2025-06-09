@@ -1,6 +1,7 @@
 import Product from "../../../DB/model/product.model.js";
 import Category from "../../../DB/model/category.model.js";
 import SubCategory from "../../../DB/model/subCategories.model.js";
+import { cloud } from "../../../utilis/multer/cloudinary.js";
 
 export const createProduct = async (req, res) => {
   try {
@@ -16,8 +17,19 @@ export const createProduct = async (req, res) => {
       vendor
     } = req.body;
 
-    const imageCover = req.files?.imageCover?.[0]?.path || null;
-    const images = req.files?.images?.map((file) => file.path) || [];
+    let imageCover = null;
+    if (req.files?.imageCover?.length) {
+      const uploaded = await cloud.uploader.upload(req.files.imageCover[0].path);
+      imageCover = uploaded.secure_url;
+    }
+
+    const images = [];
+    if (req.files?.images?.length) {
+      for (const file of req.files.images) {
+        const uploaded = await cloud.uploader.upload(file.path);
+        images.push(uploaded.secure_url);
+      }
+    }
 
     if (!name || !price || !categoryid || !subcategoryid) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -54,12 +66,13 @@ export const createProduct = async (req, res) => {
 
     await product.save();
 
-    return res.status(201).json( product )
+    return res.status(201).json(product );
 
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 };
+
 
 export const getProduct = async (req, res) => {
   try {
@@ -154,5 +167,22 @@ export const deleteProduct = async (req, res) => {
     res.status(200).json( allProducts);
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const getSubcategories = async (req, res) => {
+  try {
+    const { categoryid } = req.params;
+
+    if (!categoryid) {
+      return res.status(400).json({ message: "Category ID is required in params" });
+    }
+
+    const subcategories = await SubCategory.find({ categoryid: categoryid });
+
+    res.status(200).json( subcategories );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

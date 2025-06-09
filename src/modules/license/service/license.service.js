@@ -1,52 +1,69 @@
 import userModel, { roleTypes } from "../../../DB/model/userModel.js";
 import LicenseModel from "../../../DB/model/license.model.js";
 
+import moment from 'moment'; // Make sure moment is installed: npm install moment
 
 export const requestLicense = async (req, res) => {
-    try {
+  try {
     const {
-        fullName,
-        phoneNumber,
-        email,
-        address,
-        experience,
-        requiredArea,
-        requiredLocation,
-        plantsType,
-        numberOfColonies,
-        workPlan,
+      fullName,
+      phoneNumber,
+      email,
+      address,
+      experience,
+      requiredArea,
+      requiredLocation,
+      plantsType,
+      numberOfColonies,
+      workPlan,
     } = req.body;
 
     const nationalId = req.files?.nationalId?.[0]?.path;
     const documents = req.files?.documents?.map(file => file.path) || [];
 
     if (!nationalId || documents.length === 0) {
-        return res.status(400).json({ message: 'National ID and at least one document are required' });
+      return res.status(400).json({ message: 'National ID and at least one document are required' });
     }
 
+    const userId = req.user._id;
+
+    // ❗ Check if user already applied this month
+    const startOfMonth = moment().startOf('month').toDate();
+    const endOfMonth = moment().endOf('month').toDate();
+
+    const existingRequest = await LicenseModel.findOne({
+      appliedBy: userId,
+      createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+    });
+
+    if (existingRequest) {
+      return res.status(400).json({ message: 'You can only apply once per month' });
+    }
+
+    // ✅ Proceed with creating the license request
     const newRequest = new LicenseModel({
-        fullName,
-        phoneNumber,
-        email,
-        address,
-        experience,
-        requiredArea,
-        requiredLocation,
-        plantsType,
-        numberOfColonies,
-        workPlan,
-        nationalId,
-        documents,
-        appliedBy: req.user._id,
+      fullName,
+      phoneNumber,
+      email,
+      address,
+      experience,
+      requiredArea,
+      requiredLocation,
+      plantsType,
+      numberOfColonies,
+      workPlan,
+      nationalId,
+      documents,
+      appliedBy: userId,
     });
 
     await newRequest.save();
 
     return res.status(201).json({ message: 'License application submitted successfully', data: newRequest });
 
-    } catch (error) {
+  } catch (error) {
     return res.status(500).json({ message: 'Server error', error: error.message });
-    }
+  }
 };
 
 
@@ -101,4 +118,22 @@ export const updateLicenseStatus = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: 'Server error', error: error.message });
     }
+};
+
+
+export const getLicenseById = async (req, res) => {
+  try {
+    const { licenseId } = req.params;
+
+    const license = await LicenseModel.findById(licenseId);
+
+    if (!license) {
+      return res.status(404).json({ message: 'License not found' });
+    }
+
+    return res.status(200).json(license);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };

@@ -25,8 +25,14 @@ const bootstrap = async (app, express) => {
   app.use("/license", licenseController);
   app.use("/cart", cartRouter);
   app.use("/wishlist", wishlist);
+
   app.use("/payment", payment)
   app.use("/loan", loan)
+
+
+  //app.use("/order", orderRouter);
+  // app.use("/api", webhookroute);
+
 
   app.use(globalErrorHandling);
   await connectDB();
