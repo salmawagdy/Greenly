@@ -13,4 +13,5 @@ router.get("/:id", productServices.getProductById);
 router.put("/:id", authentication(), authorization(endpoint.addProduct), productServices.updateProduct);
 router.delete("/:id", authentication(), authorization(endpoint.addProduct), productServices.deleteProduct);
 
+
 export default router;

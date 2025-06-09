@@ -9,10 +9,7 @@ import subCategoryRouter from "./modules/subCategories/subCategories.controller.
 import cartRouter from "./modules/cartshopping/cart.controller.js";
 import wishlist from "./modules/wishList/wishList.controller.js";
 import payment from "./modules/payment/payment.controller.js"
-
-
-//import orderRouter from "./modules/order/order.controller.js";
-// import webhookroute from "./modules/webhook/webhook.controller.js";
+import loan from "./modules/loan/loan.controller.js"
 
 import { globalErrorHandling } from "./utilis/response/error.response.js";
 
@@ -28,11 +25,8 @@ const bootstrap = async (app, express) => {
   app.use("/license", licenseController);
   app.use("/cart", cartRouter);
   app.use("/wishlist", wishlist);
- app.use("/payment",payment)
-
-
-  //app.use("/order", orderRouter);
-  // app.use("/api", webhookroute);
+  app.use("/payment", payment)
+  app.use("/loan", loan)
 
   app.use(globalErrorHandling);
   await connectDB();
