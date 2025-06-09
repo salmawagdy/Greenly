@@ -12,7 +12,8 @@ export const userProfile = asyncHandler(async(req,res,next)=>{
 
 export const updateProfile = asyncHandler(
     async(req,res,next)=>{
-    const user = await userModel.findByIdAndUpdate(req.user._id, req.body, {new: true, runValidators: true})
+    const user = await userModel.findByIdAndUpdate
+    (req.user._id, req.body, {new: true, runValidators: true})
     return successResponse({res, data:{user}})
 }
 )
@@ -23,7 +24,9 @@ export const updatePassword = asyncHandler(
         if(!compareHash({plainText:oldPassword, hashValue:req.user.password})){
         return next (new Error('The old password is invalid',{cause:400}))
         }
-        const user = await userModel.findByIdAndUpdate(req.user._id,{password:generateHash({plainText:password}),changeCredentialTime:Date.now()},{new:true})
+        const user = await userModel.findByIdAndUpdate
+        (req.user._id,{password:generateHash({plainText:password})
+        ,changeCredentialTime:Date.now()},{new:true})
         
     return successResponse({res,data: {}})
 }

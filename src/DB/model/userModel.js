@@ -7,42 +7,27 @@ export const roleTypes = {
 
 const userSchema = new Schema ({
     userName:{
-        type:String,
-        required:true,
-        minlength:2,
-        maxlength:50,
-        trim:true
-
+        type:String,required:true,minlength:2,maxlength:50,trim:true
     },
     email:{
-        type:String,
-        unique:true,
-        required:true
-        
+        type:String,unique:true,required:true 
     },
     confirmEmailOTP:String,
-
     password:{
-        type:String,
-        required:true
+        type:String,required:true
     },
     resetPasswordOTP:String,
     phone:String,
     age:Number,
-    
     confirmEmail:{
-        type:Boolean,
-        default:false
+        type:Boolean,default:false
     },
     role:{
-        type:String,
-        enum:Object.values(roleTypes),
-        default:roleTypes.user
+        type:String,enum:Object.values(roleTypes),default:roleTypes.user
     },
     changeCredentialTime:Date,
     image: {
-        type: [String], 
-        default: []
+        type: [String],default: []
     }
     
 },{timestamps:true})

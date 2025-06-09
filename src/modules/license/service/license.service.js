@@ -1,5 +1,8 @@
 import userModel, { roleTypes } from "../../../DB/model/userModel.js";
+
 import LicenseModel from "../../../DB/model/license.model.js";
+import mongoose from 'mongoose';
+import { emailEvent } from "../../../utilis/events/email.event.js";
 
 import moment from 'moment'; // Make sure moment is installed: npm install moment
 
@@ -27,7 +30,7 @@ export const requestLicense = async (req, res) => {
 
     const userId = req.user._id;
 
-    // ❗ Check if user already applied this month
+
     const startOfMonth = moment().startOf('month').toDate();
     const endOfMonth = moment().endOf('month').toDate();
 
@@ -40,7 +43,6 @@ export const requestLicense = async (req, res) => {
       return res.status(400).json({ message: 'You can only apply once per month' });
     }
 
-    // ✅ Proceed with creating the license request
     const newRequest = new LicenseModel({
       fullName,
       phoneNumber,
@@ -95,32 +97,44 @@ export const getUserRequests = async (req, res) => {
 
 
 export const updateLicenseStatus = async (req, res) => {
-    try {
-        const { licenseId } = req.params;
-        const { status } = req.body;
+  try {
+    const { licenseId } = req.params;
+    const { status } = req.body;
 
-        if (!['approved', 'rejected'].includes(status)) {
-            return res.status(400).json({ message: 'Invalid status. Status must be either approved or rejected.' });
-        }
-
-        const updatedLicense = await LicenseModel.findByIdAndUpdate(
-            licenseId,
-            { status },
-            { new: true }
-        );
-
-        if (!updatedLicense) {
-            return res.status(404).json({ message: 'License request not found' });
-        }
-
-        return res.status(200).json({ message: "License status updated successfully", data: updatedLicense });
-
-    } catch (error) {
-        return res.status(500).json({ message: 'Server error', error: error.message });
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Status must be either approved or rejected.' });
     }
+
+    if (!mongoose.Types.ObjectId.isValid(licenseId)) {
+      return res.status(400).json({ message: 'Invalid license ID format' });
+    }
+
+    const updatedLicense = await LicenseModel.findByIdAndUpdate(
+      licenseId,
+      { status },
+      { new: true }
+    ).populate('appliedBy', 'email userName');
+
+    if (!updatedLicense) {
+      return res.status(404).json({ message: 'License request not found' });
+    }
+
+    // ✅ Emit event to send license status email
+    emailEvent.emit('updateStatus', {
+      email: updatedLicense.appliedBy.email,
+      userName: updatedLicense.appliedBy.userName,
+      status: updatedLicense.status,
+    });
+
+    return res.status(200).json({
+      message: 'License status updated and email sent',
+      data: updatedLicense,
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };
-
-
 export const getLicenseById = async (req, res) => {
   try {
     const { licenseId } = req.params;
@@ -134,6 +148,25 @@ export const getLicenseById = async (req, res) => {
     return res.status(200).json(license);
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+export const getLicensesByStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!status || !['pending', 'approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid or missing status field' });
+    }
+
+    const licenses = await LicenseModel.find({ status }).populate('appliedBy', 'userName email');
+
+    return res.status(200).json(
+    licenses
+    );
+  } catch (error) {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

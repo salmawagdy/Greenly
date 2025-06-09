@@ -67,7 +67,7 @@ const LicenseSchema = new Schema({
     },
     appliedBy: {
         type: Types.ObjectId,
-        ref: "User",
+        ref: "user",
         required: true,
     },
     
