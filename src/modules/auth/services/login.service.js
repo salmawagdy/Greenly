@@ -30,9 +30,9 @@ async (req,res,next)=>{
     })
     const refreshToken= generateToken({
         payload:{id:user._id},
-        signature:user.role === roleTypes.admin ? process.env.ADMIN_REFRESH_TOKEN : process.env.USER_REFRESH_TOKEN,
+        signature:user.role === roleTypes.admin ?
+        process.env.ADMIN_REFRESH_TOKEN : process.env.USER_REFRESH_TOKEN,
         expiresIn:31536000
-
     })
 
     return successResponse({res,data:{accessToken, refreshToken}})
@@ -49,12 +49,8 @@ export const forgetPassword = asyncHandler(async(req,res,next)=>{
     if (!user.confirmEmail){
         return next (new Error('Please verify your email first',{cause:404}))
     }
-
     emailEvent.emit('forgetPassword',{id:user._id,email})
-
     return successResponse({res})
-
-
 })
 
 export const validateForgetPassword = asyncHandler(async(req,res,next)=>{
@@ -83,12 +79,6 @@ export const resetPassword  = asyncHandler(async(req,res,next)=>{
     if (!user.confirmEmail){
         return next (new Error('Please verify your email first',{cause:404}))
     }
-
-// if(!compareHash({plainText: code , hashValue: user.resetPasswordOTP})) {
-
-//     return next (new Error("In-valid reset OTP", {cause:400}))
-// }
-
 await userModel.updateOne({email},{
     password: generateHash({plainText:password}),
     changeCredentialTime:Date.now(),
@@ -96,7 +86,5 @@ await userModel.updateOne({email},{
         resetPasswordOTP:0
     }
 })
-
-
     return successResponse({res})
 })

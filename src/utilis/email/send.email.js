@@ -7,7 +7,7 @@ export const sendEmail = async({
         bcc='',
         text='',
         html='',
-        subject='Confirm-Email',
+        subject='Welcome to greenly',
         attachments=[],
 }= {})=>{
     const transporter = nodemailer.createTransport({

@@ -4,9 +4,8 @@ import { generateHash } from '../security/hash.security.js'
 import { sendEmail } from '../email/send.email.js'
 import { verifyAcc } from '../email/template/verifyAcc.js'
 import userModel from '../../DB/model/userModel.js'
+import { sendLicenseEmail } from '../email/template/sendlicense.js'
 
-//import jwt from 'jsonwebtoken'
-//import { generateEmailTemplate,sendEmail } from "../email.js"
 export const emailEvent = new EventEmitter()
 
 export const emailSubject ={
@@ -45,3 +44,8 @@ emailEvent.on('sendEmail',async(data)=>{
 emailEvent.on('forgetPassword',async(data)=>{
     await sendCode({data,subject:emailSubject.resetPassword})
 })
+
+
+emailEvent.on('updateStatus', async (data) => {
+    await sendLicenseEmail(data);
+});
