@@ -30,30 +30,24 @@ return res.status(404).json({ message: "Post not found" });
     const updatedPost = await blogModel.findByIdAndUpdate(
     postId, { content }, { new: true } ).populate('createdBy', 'userName');
 
-        return successResponse({ res, data: { post: updatedPost,userName:updatedPost.createdBy.userName } });
+        return successResponse({ res, data: { post: updatedPost,
+            userName:updatedPost.createdBy.userName } });
 });
 
 
 export const deletePost = asyncHandler(async (req, res, next) => {
     const postId = req.params.postId;
-
     const post = await blogModel.findById(postId);
-
     if (!post) {
         return res.status(404).json({ message: "Post not found" });
     }
-
     if (!req.user) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-
     const isAdmin = req.user.role === roleTypes.admin;
     const isOwner = post.createdBy.toString() === req.user._id.toString();
-
     if (isAdmin || isOwner) {
         await post.deleteOne();
-
-        // Fetch blogs according to role
         const blogs = isAdmin
             ? await blogModel.find()
             : await blogModel.find({ createdBy: req.user._id });

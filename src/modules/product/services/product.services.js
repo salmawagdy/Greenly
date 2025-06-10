@@ -6,15 +6,8 @@ import { cloud } from "../../../utilis/multer/cloudinary.js";
 export const createProduct = async (req, res) => {
   try {
     const {
-      name,
-      longdescription,
-      shortdescription,
-      price,
-      categoryid,
-      subcategoryid,
-      stock,
-      ratingAvg,
-      vendor
+      name,longdescription,shortdescription,price,
+      categoryid,subcategoryid,stock,ratingAvg,vendor
     } = req.body;
 
     let imageCover = null;
@@ -22,7 +15,6 @@ export const createProduct = async (req, res) => {
       const uploaded = await cloud.uploader.upload(req.files.imageCover[0].path);
       imageCover = uploaded.secure_url;
     }
-
     const images = [];
     if (req.files?.images?.length) {
       for (const file of req.files.images) {
@@ -30,16 +22,13 @@ export const createProduct = async (req, res) => {
         images.push(uploaded.secure_url);
       }
     }
-
     if (!name || !price || !categoryid || !subcategoryid) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
     const categoryExists = await Category.findById(categoryid);
     if (!categoryExists) {
       return res.status(404).json({ message: "Category not found" });
     }
-
     const subCategoryExists = await SubCategory.findById(subcategoryid);
     if (!subCategoryExists) {
       return res.status(400).json({ message: "Invalid Subcategory ID" });
@@ -51,11 +40,7 @@ export const createProduct = async (req, res) => {
     }
 
     const product = new Product({
-      name,
-      longdescription,
-      shortdescription,
-      price,
-      category: categoryid,
+      name,longdescription,shortdescription,price,category: categoryid,
       subCategory: subcategoryid,
       stock,
       ratingAvg,
@@ -117,20 +102,16 @@ export const updateProduct = async (req, res) => {
 export const getProductByCategoryId = async (req, res) => {
   try {
     const { id } = req.params;
-
     const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({ message: "Category not found." });
     }
-
     const subCategories = await SubCategory.find({ categoryid: id });
-
     const subCategoryWithProducts = await Promise.all(
       subCategories.map(async (subCategory) => {
         const products = await Product.find({ subCategory: subCategory._id })
           .populate("category", "name")
           .populate("subCategory", "name");
-
         return {
           subCategoryId: subCategory._id,
           subCategoryName: subCategory.name,
@@ -138,13 +119,11 @@ export const getProductByCategoryId = async (req, res) => {
         };
       })
     );
-
     const result = {
       categoryId: category._id,
       categoryName: category.name,
       subCategories: subCategoryWithProducts,
     };
-
     res.status(200).json(result);
   } catch (error) {
     console.error(error);

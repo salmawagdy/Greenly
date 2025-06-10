@@ -1,13 +1,11 @@
 import axios from "axios";
 
 export const getLoanPrediction = async (formData) => {
-  // Ensure formData is a plain JS object (NOT FormData or URLSearchParams)
   const response = await axios.post(
-    'https://loan-prediction-production.up.railway.app/predict', // Correct Flask route
-    formData,
+    'https://loan-prediction-production.up.railway.app/predict', 
     {
       headers: {
-        "Content-Type": "application/json", // Important: tell Flask it's JSON
+        "Content-Type": "application/json", 
       },
     }
   );

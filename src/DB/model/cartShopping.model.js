@@ -22,7 +22,7 @@ const cartSchema = new Schema(
     ],
     totalPrice: { type: Number, required: true, default: 0 },
     status: { type: String, enum: ["active", "ordered"], default: "active" },
-    counter: { type: Number, default: 0 }, // <-- new field
+    counter: { type: Number, default: 0 }, 
   },
   { timestamps: true }
 );

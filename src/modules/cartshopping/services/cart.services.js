@@ -70,28 +70,6 @@ export const getCart = async (req, res) => {
   }
 };
 
-// export const deleteCart = async (req, res) => {
-//   try {
-//     const { productId } = req.params;
-//     const Cart = await cart.findOne({ userId: req.user._id, status: "active" });
-
-//     if (!Cart) return res.status(404).json({ message: "Cart not found" });
-
-//     Cart.products = Cart.products.filter(
-//       (p) => p.productId.toString() !== productId
-//     );
-
-//     await Cart.save();
-//     await Cart.populate({
-//       path: "products.productId",
-//       select:
-//         "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
-//     });
-//     res.json(Cart);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 export const deleteCart = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -113,7 +91,7 @@ export const deleteCart = async (req, res) => {
       (p) => p.productId.toString() !== productId
     );
 
-    // تحديث السعر بعد الحذف
+
     Cart.totalPrice = Cart.products.reduce(
       (acc, item) => acc + item.quantity * item.price,
       0

@@ -11,7 +11,6 @@ export const addToWishlist = async (req, res) => {
     if (!wishlist) {
       wishlist = new Wishlist({ userId: req.user._id, products: [] });
     }
-
     const productExists = wishlist.products.find((p) => {
       console.log(p.productId);
       return p.productId._id.toString() === productId;
@@ -20,7 +19,6 @@ export const addToWishlist = async (req, res) => {
     if (productExists) {
       return res.status(400).json({ message: "Product already in wishlist" });
     }
-
     wishlist.products.push({ productId });
     await wishlist.save();
 

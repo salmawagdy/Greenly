@@ -42,8 +42,7 @@ export const deleteCategory = async (req, res) => {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const categories = await Category.find(); // Fetch updated list
-
+    const categories = await Category.find(); 
     res.status(200).json(
       categories,);
   } catch (error) {

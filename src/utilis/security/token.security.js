@@ -14,18 +14,7 @@ export const decodedToken = async({authorization="" , tokenType=tokenTypes.acces
     }
     let access_signature='';
     let refresh_signature='';
-    // switch(Bearer){
-    //     case"admin":
-    //         access_signature=process.env.ADMIN_ACCESS_TOKEN;
-    //         refresh_signature=process.env.ADMIN_REFRESH_TOKEN;
-    //         break;
-    //     case"Bearer":
-    //         access_signature=process.env.USER_ACCESS_TOKEN;
-    //         refresh_signature=process.env.USER_REFRESH_TOKEN;
-    //         break;
-    //     default:
-    //         break;
-    // }
+  
     const decoded = verifyToken({token,signature:process.env.USER_ACCESS_TOKEN});
 
     if(!decoded?.id){

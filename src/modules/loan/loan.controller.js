@@ -15,11 +15,9 @@ router.post("/predict", authentication(), async (req, res) => {
       return res.status(400).json({ error: "Missing or invalid form data" });
     }
 
-    // Check if user already applied this month
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
-
     const endOfMonth = new Date(startOfMonth);
     endOfMonth.setMonth(endOfMonth.getMonth() + 1);
 
@@ -33,11 +31,7 @@ router.post("/predict", authentication(), async (req, res) => {
         .status(409)
         .json({ message: "You can only apply once per month" });
     }
-
-    // Predict loan status
     const status = await getLoanPrediction(formData);
-
-    // Save the application
     const newLoan = await loanModel.create({
       userId,
       inputData: formData,
@@ -60,7 +54,7 @@ router.post("/predict", authentication(), async (req, res) => {
 
 router.get("/status/:id", authentication(), async (req, res) => {
   try {
-    const userId = req.user._id; // Getting the authenticated user's ID
+    const userId = req.user._id; 
     const { loanId } = req.params;
 
     const loan = await loanModel.findOne({ loanId, userId });

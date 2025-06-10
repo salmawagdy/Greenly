@@ -11,6 +11,7 @@ export const requestLicense = async (req, res) => {
     const {
       fullName,
       phoneNumber,
+
       email,
       address,
       experience,
@@ -27,10 +28,7 @@ export const requestLicense = async (req, res) => {
     if (!nationalId || documents.length === 0) {
       return res.status(400).json({ message: 'National ID and at least one document are required' });
     }
-
     const userId = req.user._id;
-
-
     const startOfMonth = moment().startOf('month').toDate();
     const endOfMonth = moment().endOf('month').toDate();
 
@@ -42,7 +40,6 @@ export const requestLicense = async (req, res) => {
     if (existingRequest) {
       return res.status(400).json({ message: 'You can only apply once per month' });
     }
-
     const newRequest = new LicenseModel({
       fullName,
       phoneNumber,
@@ -60,13 +57,11 @@ export const requestLicense = async (req, res) => {
     });
 
     await newRequest.save();
-
     return res.status(201).json({ message: 'License application submitted successfully', data: newRequest });
 
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+  }};
 
 
 export const getAllRequests = async (req, res) => {
@@ -132,8 +127,10 @@ export const updateLicenseStatus = async (req, res) => {
 
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+  }};
+
+
+
 export const getLicenseById = async (req, res) => {
   try {
     const { licenseId } = req.params;
