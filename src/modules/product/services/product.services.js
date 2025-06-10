@@ -6,8 +6,15 @@ import { cloud } from "../../../utilis/multer/cloudinary.js";
 export const createProduct = async (req, res) => {
   try {
     const {
-      name,longdescription,shortdescription,price,
-      categoryid,subcategoryid,stock,ratingAvg,vendor
+      name,
+      longdescription,
+      shortdescription,
+      price,
+      categoryid,
+      subcategoryid,
+      stock,
+      ratingAvg,
+      vendor
     } = req.body;
 
     let imageCover = null;
@@ -15,6 +22,7 @@ export const createProduct = async (req, res) => {
       const uploaded = await cloud.uploader.upload(req.files.imageCover[0].path);
       imageCover = uploaded.secure_url;
     }
+
     const images = [];
     if (req.files?.images?.length) {
       for (const file of req.files.images) {
@@ -22,26 +30,36 @@ export const createProduct = async (req, res) => {
         images.push(uploaded.secure_url);
       }
     }
+
     if (!name || !price || !categoryid || !subcategoryid) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+
+    // Validate existence of category and subcategory
     const categoryExists = await Category.findById(categoryid);
     if (!categoryExists) {
       return res.status(404).json({ message: "Category not found" });
     }
+
     const subCategoryExists = await SubCategory.findById(subcategoryid);
     if (!subCategoryExists) {
       return res.status(400).json({ message: "Invalid Subcategory ID" });
     }
 
+    // Check for duplicate product
     const productExists = await Product.findOne({ name });
     if (productExists) {
       return res.status(400).json({ message: "Product already exists" });
     }
 
+    // Create and save product with ObjectId references
     const product = new Product({
-      name,longdescription,shortdescription,price,category: categoryid,
-      subCategory: subcategoryid,
+      name,
+      longdescription,
+      shortdescription,
+      price,
+      category: categoryExists._id,
+      subCategory: subCategoryExists._id,
       stock,
       ratingAvg,
       imageCover,
@@ -51,10 +69,12 @@ export const createProduct = async (req, res) => {
 
     await product.save();
 
-    return res.status(201).json(product );
+    // Return raw document with ObjectId fields
+    return res.status(201).json(product);
 
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    console.error("Product creation error:", error);
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
