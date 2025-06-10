@@ -30,3 +30,23 @@ export const getCategoryById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedCategory = await Category.findByIdAndDelete(id);
+
+    if (!deletedCategory) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const categories = await Category.find(); // Fetch updated list
+
+    res.status(200).json(
+      categories,);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -7,5 +7,6 @@ const router = Router();
 router.get("/allsubcategories", subCategoryServices.getSubCategory);
 router.get("/:id", subCategoryServices.getSubCategoryById);
 router.post("/addsubCategory",authentication(),authorization(endpoint.addSub),subCategoryServices.createSubCategory);
+router.delete("/delete/:id",authentication(),authorization(endpoint.addSub),subCategoryServices.deleteSubCategory);
 
 export default router;

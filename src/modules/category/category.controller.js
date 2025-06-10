@@ -8,5 +8,5 @@ const router = Router();
 router.get("/allcategories", categoryServices.getCategory);
 router.get("/:id", categoryServices.getCategoryById);
 router.post("/addcategory", authentication(),authorization(endpoint.addCategory), categoryServices.createCategory);
-
+router.delete('/delete/:id',authentication(),authorization(endpoint.addCategory),categoryServices.deleteCategory)
 export default router;

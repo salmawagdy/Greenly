@@ -33,5 +33,5 @@ const userSchema = new Schema ({
 },{timestamps:true})
 
 
-const userModel =mongoose.models.User || model('user', userSchema)
+const userModel =mongoose.models.User || model('User', userSchema)
 export default userModel

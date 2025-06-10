@@ -119,7 +119,6 @@ export const updateLicenseStatus = async (req, res) => {
       return res.status(404).json({ message: 'License request not found' });
     }
 
-    // ✅ Emit event to send license status email
     emailEvent.emit('updateStatus', {
       email: updatedLicense.appliedBy.email,
       userName: updatedLicense.appliedBy.userName,
@@ -161,7 +160,7 @@ export const getLicensesByStatus = async (req, res) => {
       return res.status(400).json({ message: 'Invalid or missing status field' });
     }
 
-    const licenses = await LicenseModel.find({ status }).populate('appliedBy', 'userName email');
+    const licenses = await LicenseModel.find({ status }).populate('appliedBy', 'email userName');
 
     return res.status(200).json(
     licenses
