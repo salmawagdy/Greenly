@@ -14,12 +14,6 @@ router.post(
   authorization(endpoint.paymentt),createCheckoutSession
 )
 
-// router.post(
-//   "/create-order",
-//   authentication(),
-//   authorization(endpoint.paymentt),
-//   createStripeOrder
-// );
 
  router.post("/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
 
@@ -27,3 +21,10 @@ router.get('/allorders', authentication(), authorization(endpoint.adminn), getAl
 router.get('/:id', authentication(), authorization(endpoint.paymentt),getSingleOrder);
 
 export default router;
+
+// router.post(
+//   "/create-order",
+//   authentication(),
+//   authorization(endpoint.paymentt),
+//   createStripeOrder
+// );

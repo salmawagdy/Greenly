@@ -15,6 +15,7 @@ export const createCheckoutSession = async (req, res) => {
     if (!cart || cart.products.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
+    const { address, phone } = req.body;
 
     const lineItems = cart.products.map((item) => ({
       price_data: {
@@ -32,10 +33,12 @@ export const createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel`,
+      success_url: `${process.env.ngrok_url}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.ngrok_url}/cancel`,
       metadata: {
         userId: req.user._id.toString(),
+        address: JSON.stringify(address),
+        phone,
       },
     });
 
@@ -50,6 +53,8 @@ export const createCheckoutSession = async (req, res) => {
       amount: cart.totalPrice,
       status: "pending",
       paymentIntentId: session.payment_intent,
+      shippingAddress: address,
+      phone,
     });
 
     await newOrder.save();
@@ -81,6 +86,16 @@ export const handleStripeWebhook = async (req, res) => {
     });
     if (order) {
       order.status = "paid";
+      await order.save();
+    }
+  }
+   if (event.type === "checkout.session.expired") {
+    const session = event.data.object;
+    const order = await Order.findOne({
+      paymentIntentId: session.payment_intent,
+    });
+    if (order) {
+      order.status = "cancelled";
       await order.save();
     }
   }

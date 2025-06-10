@@ -29,6 +29,13 @@ const orderSchema = new Schema({
   paymentIntentId: {
     type: String, // This will be returned by Stripe
   },
+  shippingAddress: {
+    type: Object,
+    default: {},
+  },
+  phone: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -36,4 +43,3 @@ const orderSchema = new Schema({
 });
 
 export default mongoose.model("order", orderSchema);
-
