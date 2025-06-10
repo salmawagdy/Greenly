@@ -45,14 +45,6 @@ export const createProduct = async (req, res) => {
     if (!subCategoryExists) {
       return res.status(400).json({ message: "Invalid Subcategory ID" });
     }
-
-    // Check for duplicate product
-    const productExists = await Product.findOne({ name });
-    if (productExists) {
-      return res.status(400).json({ message: "Product already exists" });
-    }
-
-    // Create and save product with ObjectId references
     const product = new Product({
       name,
       longdescription,
