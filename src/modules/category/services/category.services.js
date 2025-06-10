@@ -1,4 +1,7 @@
 import Category from "../../../DB/model/category.model.js";
+import subcategory from "../../../DB/model/subCategories.model.js";
+import Product from "../../../DB/model/product.model.js";
+import mongoose from "mongoose"
 
 export const createCategory = async (req, res) => {
   try {
@@ -35,16 +38,31 @@ export const getCategoryById = async (req, res) => {
 export const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
+    const objectId = new mongoose.Types.ObjectId(id); // 👈 Convert string to ObjectId
 
-    const deletedCategory = await Category.findByIdAndDelete(id);
-
+    // 1. Delete the category
+    const deletedCategory = await Category.findByIdAndDelete(objectId);
     if (!deletedCategory) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const categories = await Category.find(); 
-    res.status(200).json(
-      categories,);
+    // 2. Delete related subcategories
+    const relatedSubCategories = await subcategory.find({ categoryid: objectId });
+    const subCategoryIds = relatedSubCategories.map(sub => sub._id);
+    await subcategory.deleteMany({ categoryid: objectId });
+
+    // 3. Delete related products
+    await Product.deleteMany({
+      $or: [
+        { "category._id": objectId },
+        { "subCategory._id": { $in: subCategoryIds } }
+      ]
+    });
+
+    // 4. Return updated categories
+    const categories = await Category.find();
+    res.status(200).json(categories);
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

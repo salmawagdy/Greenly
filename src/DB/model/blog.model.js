@@ -6,8 +6,8 @@ const blogSchema = new Schema ({
         type:String, minLength:2, maxLength:5000,
         required:true
     },
-    createdBy:{type:Types.ObjectId, ref:'user'},
-    deletedBy:{type:Types.ObjectId, ref:'user'},
+    createdBy:{type:Types.ObjectId, ref:'User'},
+    deletedBy:{type:Types.ObjectId, ref:'User'},
     idDeleted:Boolean
     },{timestamps:true})
 
