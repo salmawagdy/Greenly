@@ -7,16 +7,29 @@ const storage = new CloudinaryStorage({
   cloudinary: cloud,
   params: {
     folder: "products",
-    allowed_formats: ["jpg", "png", "jpeg"],
   },
 });
 
+const licenseStorage = new CloudinaryStorage({
+  cloudinary: cloud,
+  params: {
+    folder: "license",
+  },
+});
+
+
 const uploadCloudFile = multer({ storage });
 
-// Create the middleware for the fields you want
-const uploadProductImages = uploadCloudFile.fields([
+
+export const uploadCloudProductImages = uploadCloudFile.fields([
   { name: 'imageCover', maxCount: 1 },
   { name: 'images', maxCount: 5 },
 ]);
 
-export { uploadCloudFile, uploadProductImages };
+
+export const uploadLicenseCloud = multer({ storage: licenseStorage });
+
+export const uploadCloudLicenseFiles = uploadLicenseCloud.fields([
+  { name: 'nationalId', maxCount: 1 },
+  { name: 'documents', maxCount: 10 },
+]);
