@@ -3,15 +3,13 @@ import { authentication,authorization } from '../../middleware/auth.middleware.j
 import {endpoint} from './product.authorization.js'
 import * as productServices from "./services/product.services.js";
 //import { uploadProductImages } from '../../utilis/multer/local.multer.js'
-import {uploadCloudFile} from "../../utilis/multer/cloud.multer.js"
+import {uploadCloudProductImages} from "../../utilis/multer/cloud.multer.js"
 const router = Router();
 
 
 router.get("/getCategoryBySubcategory/:categoryid",  productServices.getSubcategories);
 router.get("/allproducts",  productServices.getProduct);
-router.post("/addproduct",authentication(),authorization(endpoint.addProduct),uploadCloudFile.fields([
-    { name: 'imageCover', maxCount: 1 },
-    { name: 'images', maxCount: 5 }]), productServices.createProduct);
+router.post("/addproduct",authentication(),authorization(endpoint.addProduct),uploadCloudProductImages, productServices.createProduct);
 
 
 router.get("/products-by-category/:id", productServices.getProductByCategoryId);

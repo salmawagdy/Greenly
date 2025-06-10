@@ -5,7 +5,7 @@ const wishlistSchema = new Schema(
     counter: { type: Number, default: 0 },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: "User",
       required: true,
     },
     products: [

@@ -15,14 +15,17 @@ const productSchema = new Schema(
     price: { type: Number, required: true, min: 0 
     },
 
-    category: {
-  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-  name: { type: String }
+category: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Category",
+  required: true
 },
 subCategory: {
-  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' },
-  name: { type: String }
-},
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "subCategory", 
+  required: true
+}
+,
     stock: { type: Number, default: 0, min: 0 },
 
     imageCover: { type: String },

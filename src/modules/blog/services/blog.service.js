@@ -36,34 +36,39 @@ return res.status(404).json({ message: "Post not found" });
 
 
 export const deletePost = asyncHandler(async (req, res, next) => {
-    const postId = req.params.postId;
-    const post = await blogModel.findById(postId);
-    if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-    }
-    if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-    }
-    const isAdmin = req.user.role === roleTypes.admin;
-    const isOwner = post.createdBy.toString() === req.user._id.toString();
-    if (isAdmin || isOwner) {
-        await post.deleteOne();
-        const blogs = isAdmin
-            ? await blogModel.find()
-            : await blogModel.find({ createdBy: req.user._id });
+  const { postId } = req.params;
 
-        return successResponse({
-            res,
-            status: 200,
-            message: "Post deleted successfully",
-            data: blogs,
-        });
-    } else {
-        return res.status(403).json({ 
-            message: "You are not authorized to delete this post",
-            data: { post }
-        });
-    }
+  const post = await blogModel.findById(postId).populate('createdBy', 'userName');
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const isAdmin = req.user.role === roleTypes.admin;
+  const isOwner = post.createdBy._id.toString() === req.user._id.toString();
+
+  if (!isAdmin && !isOwner) {
+    return res.status(403).json({
+      message: "You are not authorized to delete this post",
+      data: { post },
+    });
+  }
+
+  await post.deleteOne();
+
+  const blogs = isAdmin
+    ? await blogModel.find().populate('createdBy', 'userName')
+    : await blogModel.find({ createdBy: req.user._id }).populate('createdBy', 'userName');
+
+  return successResponse({
+    res,
+    status: 200,
+    message: `Post deleted successfully by ${req.user.userName}`,
+    data: blogs,
+  });
 });
 
 
