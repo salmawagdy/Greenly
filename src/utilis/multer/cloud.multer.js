@@ -1,35 +1,65 @@
-
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { cloud } from './cloudinary.js'; 
+import { cloud } from './cloudinary.js';
+import path from 'path';
 
-const storage = new CloudinaryStorage({
+// === Product Storage (Images only) ===
+const productStorage = new CloudinaryStorage({
   cloudinary: cloud,
   params: {
     folder: "products",
+    resource_type: 'image'
   },
 });
 
-const licenseStorage = new CloudinaryStorage({
-  cloudinary: cloud,
-  params: {
-    folder: "license",
-  },
-});
+const uploadCloudProduct = multer({ storage: productStorage });
 
-
-const uploadCloudFile = multer({ storage });
-
-
-export const uploadCloudProductImages = uploadCloudFile.fields([
+export const uploadCloudProductImages = uploadCloudProduct.fields([
   { name: 'imageCover', maxCount: 1 },
   { name: 'images', maxCount: 5 },
 ]);
 
+// === License Storage (PDFs and Docs) ===
+const licenseStorage = new CloudinaryStorage({
+  cloudinary: cloud,
+  params: async (req, file) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const isImage = file.mimetype.startsWith('image/');
 
-export const uploadLicenseCloud = multer({ storage: licenseStorage });
+    return {
+      folder: 'license',
+      resource_type: isImage ? 'image' : 'raw',
+      public_id: `${Date.now()}_${path.basename(file.originalname, ext)}`,
+      format: ext.replace('.', '')
+    };
+  },
+});
 
-export const uploadCloudLicenseFiles = uploadLicenseCloud.fields([
+const fileFilter = (req, file, cb) => {
+  const allowedMimes = [
+    'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain'
+  ];
+
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Unsupported file type.'), false);
+  }
+};
+
+const uploadLicense = multer({
+  storage: licenseStorage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
+});
+
+export const uploadCloudLicenseFiles = uploadLicense.fields([
   { name: 'nationalId', maxCount: 1 },
-  { name: 'documents', maxCount: 10 },
+  { name: 'documents', maxCount: 10 }
 ]);

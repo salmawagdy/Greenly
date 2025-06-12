@@ -2,6 +2,7 @@ import userModel, { roleTypes } from "../../../DB/model/userModel.js";
 import blogModel from '../../../DB/model/blog.model.js';
 import { asyncHandler } from "../../../utilis/response/error.response.js";
 import { successResponse } from "../../../utilis/response/success.response.js";
+import mongoose from 'mongoose'
 
 export const createPost =asyncHandler(
     async(req,res,next)=>{
@@ -57,16 +58,20 @@ export const deletePost = asyncHandler(async (req, res, next) => {
     });
   }
 
-  await post.deleteOne();
+  await post.deleteOne(); 
 
   const blogs = isAdmin
-    ? await blogModel.find().populate('createdBy', 'userName')
-    : await blogModel.find({ createdBy: req.user._id }).populate('createdBy', 'userName');
+    ? await blogModel.find()
+        .populate({ path: 'createdBy', select: 'userName' })
+        .populate({ path: 'replies.createdBy', select: 'userName' })
+    : await blogModel.find({ createdBy: req.user._id })
+        .populate({ path: 'createdBy', select: 'userName' })
+        .populate({ path: 'replies.createdBy', select: 'userName' });
 
   return successResponse({
     res,
     status: 200,
-    message: `Post deleted successfully by ${req.user.userName}`,
+    message: `Post and its replies deleted successfully `,
     data: blogs,
   });
 });
@@ -75,12 +80,15 @@ export const deletePost = asyncHandler(async (req, res, next) => {
 
 
 export const getAllPosts = asyncHandler(async (req, res, next) => {
-    const posts = await blogModel.find().populate('createdBy','userName');
-    return successResponse({
+  const posts = await blogModel.find()
+    .populate({ path: 'createdBy', select: 'userName' }) 
+    .populate({ path: 'replies.createdBy', select: 'userName' }); 
+
+  return successResponse({
     res,
     status: 200,
     data: posts,
-    });
+  });
 });
 
 
@@ -94,4 +102,75 @@ export const getUserPosts = asyncHandler(async (req, res, next) => {
     status: 200,
     data: posts,
     });
+});
+
+export const replyToPost = asyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+  const { content } = req.body;
+
+  if (!content || content.trim() === "") {
+    return res.status(400).json({ message: "Reply content is required" });
+  }
+
+  const post = await blogModel.findById(postId);
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
+  const reply = {
+    content,
+    createdBy: req.user._id,
+  };
+
+  post.replies.push(reply);
+  await post.save();
+
+  await post.populate([
+    { path: 'createdBy', select: 'userName' },
+    { path: 'replies.createdBy', select: 'userName' },
+  ]);
+
+  return successResponse({
+    res,
+    status: 201,
+    message: 'Reply added successfully',
+    data: post,
+  });
+});
+
+
+export const deleteReply = asyncHandler(async (req, res, next) => {
+  const { postId, replyId } = req.params;
+
+  const post = await blogModel.findById(postId)
+    .populate('createdBy', 'userName')
+    .populate('replies.createdBy', 'userName');
+
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
+  const reply = post.replies.id(replyId);
+  if (!reply) {
+    return res.status(404).json({ message: "Reply not found" });
+  }
+
+  const isAdmin = req.user.role === roleTypes.admin;
+  const isAuthor = reply.createdBy._id.toString() === req.user._id.toString();
+
+  if (!isAdmin && !isAuthor) {
+    return res.status(403).json({ message: "You are not authorized to delete this reply" });
+  }
+
+  reply.remove(); // remove the subdocument
+  await post.save();
+
+  await post.populate('replies.createdBy', 'userName');
+
+  return successResponse({
+    res,
+    status: 200,
+    message: "Reply deleted successfully",
+    data: post,
+  });
 });
