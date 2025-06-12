@@ -1,5 +1,10 @@
 import express from "express";
-import { createCheckoutSession ,handleStripeWebhook ,getAllOrders,getSingleOrder } from "./services/payment.services.js";
+import {
+  createCheckoutSession,
+  //handleStripeWebhook,
+  getAllOrders,
+  getSingleOrder,
+} from "./services/payment.services.js";
 import {
   authentication,
   authorization,
@@ -7,18 +12,32 @@ import {
 import { endpoint } from "./payment.authorization.js";
 const router = express.Router();
 
+// router.post(
+//   "/webhook",
+//   express.raw({ type: "application/json" }),
+//   handleStripeWebhook
+// );
 
 router.post(
   "/create-order",
   authentication(),
-  authorization(endpoint.paymentt),createCheckoutSession
-)
+  authorization(endpoint.paymentt),
+  createCheckoutSession
+);
 
 
- router.post("/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
-
-router.get('/allorders', authentication(), authorization(endpoint.adminn), getAllOrders);
-router.get('/:id', authentication(), authorization(endpoint.paymentt),getSingleOrder);
+router.get(
+  "/allorders",
+  authentication(),
+  authorization(endpoint.adminn),
+  getAllOrders
+);
+router.get(
+  "/:id",
+  authentication(),
+  authorization(endpoint.paymentt),
+  getSingleOrder
+);
 
 export default router;
 

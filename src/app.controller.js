@@ -10,10 +10,12 @@ import cartRouter from "./modules/cartshopping/cart.controller.js";
 import wishlist from "./modules/wishList/wishList.controller.js";
 import payment from "./modules/payment/payment.controller.js"
 import loan from "./modules/loan/loan.controller.js"
+import webhook from "./modules/payment/webhook.controller.js"
 
 import { globalErrorHandling } from "./utilis/response/error.response.js";
 
 const bootstrap = async (app, express) => {
+  app.use("/webhook",webhook)
   app.use(express.json());
 
   app.use("/product", productRouter);
@@ -28,10 +30,6 @@ const bootstrap = async (app, express) => {
 
   app.use("/payment", payment)
   app.use("/loan", loan)
-
-
-  //app.use("/order", orderRouter);
-  // app.use("/api", webhookroute);
 
 
   app.use(globalErrorHandling);

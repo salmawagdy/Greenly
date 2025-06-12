@@ -10,7 +10,8 @@
 
   "scripts": {
 
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "stripe-webhook": "stripe listen --forward-to localhost:3000/payment/webhook"
 
   },
 
