@@ -26,9 +26,7 @@ const orderSchema = new Schema({
     enum: ["pending", "paid", "failed", "cancelled"],
     default: "pending",
   },
-  paymentIntentId: {
-    type: String, // This will be returned by Stripe
-  },
+ checkoutSessionId: { type: String },
   shippingAddress: {
     type: Object,
     default: {},

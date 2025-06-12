@@ -6,6 +6,8 @@ const stripe = new Stripe(
 );
 
 export const createCheckoutSession = async (req, res) => {
+  console.log("Authenticated user:", req.user);
+
   try {
     const cart = await Cart.findOne({
       userId: req.user._id,
@@ -15,7 +17,8 @@ export const createCheckoutSession = async (req, res) => {
     if (!cart || cart.products.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
-    const { address, phone } = req.body;
+    const { address } = req.body;
+    const phone = address.phone;
 
     const lineItems = cart.products.map((item) => ({
       price_data: {
@@ -33,8 +36,8 @@ export const createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.ngrok_url}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.ngrok_url}/cancel`,
+      success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/cancel`,
       metadata: {
         userId: req.user._id.toString(),
         address: JSON.stringify(address),
@@ -52,7 +55,7 @@ export const createCheckoutSession = async (req, res) => {
       })),
       amount: cart.totalPrice,
       status: "pending",
-      paymentIntentId: session.payment_intent,
+      checkoutSessionId: session.id,
       shippingAddress: address,
       phone,
     });
@@ -82,17 +85,17 @@ export const handleStripeWebhook = async (req, res) => {
     const session = event.data.object;
 
     const order = await Order.findOne({
-      paymentIntentId: session.payment_intent,
+      checkoutSessionId: session.id,
     });
     if (order) {
       order.status = "paid";
       await order.save();
     }
   }
-   if (event.type === "checkout.session.expired") {
+  if (event.type === "checkout.session.expired") {
     const session = event.data.object;
     const order = await Order.findOne({
-      paymentIntentId: session.payment_intent,
+      checkoutSessionId: session.id,
     });
     if (order) {
       order.status = "cancelled";
@@ -105,10 +108,12 @@ export const handleStripeWebhook = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('userId', 'userName email').sort({ createdAt: -1 });
+    const orders = await Order.find()
+      .populate("userId", "userName email")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
-      message: 'All orders fetched successfully',
+      message: "All orders fetched successfully",
       count: orders.length,
       orders,
     });
@@ -120,14 +125,14 @@ export const getSingleOrder = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id).populate('userId', 'userName email');
+    const order = await Order.findById(id).populate("userId", "userName email");
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
     res.status(200).json({
-      message: 'Order fetched successfully',
+      message: "Order fetched successfully",
       order,
     });
   } catch (error) {
