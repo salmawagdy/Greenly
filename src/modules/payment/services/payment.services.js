@@ -90,6 +90,14 @@ export const handleStripeWebhook = async (req, res) => {
     if (order) {
       order.status = "paid";
       await order.save();
+      const userId = order.userId;
+
+      const userCart = await Cart.findOne({ userId, status: "active" });
+      if (userCart) {
+        userCart.products = [];
+        userCart.totalPrice = 0;
+        await userCart.save();
+      }
     }
   }
   if (event.type === "checkout.session.expired") {
