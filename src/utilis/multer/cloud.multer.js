@@ -17,7 +17,6 @@ export const uploadCloudProductImages = uploadCloudProduct.fields([
   { name: 'imageCover', maxCount: 1 },
   { name: 'images', maxCount: 5 },
 ]);
-
 const licenseStorage = new CloudinaryStorage({
   cloudinary: cloud,
   params: async (req, file) => {
@@ -26,9 +25,12 @@ const licenseStorage = new CloudinaryStorage({
 
     return {
       folder: 'license',
-      resource_type: isImage ? 'image' : 'raw',
+      resource_type: isImage ? 'image' : 'raw', // PDF goes as raw
       public_id: `${Date.now()}_${path.basename(file.originalname, ext)}`,
-      format: ext.replace('.', '')
+      format: ext.replace('.', ''),
+      use_filename: true,
+      unique_filename: true,
+      overwrite: true
     };
   },
 });
