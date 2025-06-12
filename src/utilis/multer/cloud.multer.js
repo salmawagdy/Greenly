@@ -3,7 +3,6 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { cloud } from './cloudinary.js';
 import path from 'path';
 
-// === Product Storage (Images only) ===
 const productStorage = new CloudinaryStorage({
   cloudinary: cloud,
   params: {
@@ -19,7 +18,6 @@ export const uploadCloudProductImages = uploadCloudProduct.fields([
   { name: 'images', maxCount: 5 },
 ]);
 
-// === License Storage (PDFs and Docs) ===
 const licenseStorage = new CloudinaryStorage({
   cloudinary: cloud,
   params: async (req, file) => {
@@ -55,7 +53,7 @@ const uploadLicense = multer({
   storage: licenseStorage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
+    fileSize: 5 * 1024 * 1024 
   }
 });
 

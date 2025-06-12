@@ -140,14 +140,14 @@ export const replyToPost = asyncHandler(async (req, res, next) => {
 
 
 export const deleteReply = asyncHandler(async (req, res, next) => {
-  const { postId, replyId } = req.params;
+  const { replyId } = req.params;
 
-  const post = await blogModel.findById(postId)
+  const post = await blogModel.findOne({ 'replies._id': replyId })
     .populate('createdBy', 'userName')
     .populate('replies.createdBy', 'userName');
 
   if (!post) {
-    return res.status(404).json({ message: "Post not found" });
+    return res.status(404).json({ message: "Reply not found" });
   }
 
   const reply = post.replies.id(replyId);
@@ -162,7 +162,8 @@ export const deleteReply = asyncHandler(async (req, res, next) => {
     return res.status(403).json({ message: "You are not authorized to delete this reply" });
   }
 
-  reply.remove(); // remove the subdocument
+  // ✅ Correct way to remove a subdocument by ID
+  post.replies.pull(replyId);
   await post.save();
 
   await post.populate('replies.createdBy', 'userName');
