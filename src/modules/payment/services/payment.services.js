@@ -107,6 +107,21 @@ export const handleStripeWebhook = async (req, res) => {
       await order.save();
       const userId = order.userId;
 
+       for (const item of order.items) {
+        const product = await Product.findById(item.productId);
+
+        if (product) {
+          if (product.stock < item.quantity) {
+            // لو الكمية أقل من المطلوب
+            console.warn(`Not enough stock for product ${product.name}`);
+            continue; // ممكن كمان تعملي لوج أو alert لاحقًا
+          }
+
+          product.stock -= item.quantity;
+          await product.save();
+        }
+      }
+
       const userCart = await Cart.findOne({ userId, status: "active" });
       if (userCart) {
         userCart.products = [];
