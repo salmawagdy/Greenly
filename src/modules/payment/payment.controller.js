@@ -39,7 +39,7 @@ router.get(
   getSingleOrder
 );
 router.patch(
-  "/update-status/:orderId",
+  "/update-status/:id",
   authentication(),
   authorization(endpoint.adminn),
   updateOrderStatus

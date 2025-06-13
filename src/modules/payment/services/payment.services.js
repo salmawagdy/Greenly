@@ -178,7 +178,7 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    order.status = status;
+    order.statusofpayment = newStatus;
     await order.save();
 
     res.status(200).json({
