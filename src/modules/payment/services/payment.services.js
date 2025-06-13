@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import Cart from "../../../DB/model/cartShopping.model.js";
 import Order from "../../../DB/model/order.model.js";
 import UserAddress from "../../../DB/model/addresses.model.js";
-
+import Product from "../../../DB/model/product.model.js";
 
 const stripe = new Stripe(
   "sk_test_51RIsu6PcDaK4NqZIDd8y7NYBIf0qWGLAhTgQUouiIRQNHI9JjW1GZGVdLYpAK0kzgJK00diA1EBBQWGV7Hxuev0F00RS8Zn65M"

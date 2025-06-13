@@ -10,10 +10,9 @@ export const addToCart = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-     if (product.stock <= 0) {
+    if (product.stock <= 0) {
       return res.status(400).json({ message: "Product is out of stock" });
     }
-
 
     let Cart = await cart.findOne({ userId: req.user._id, status: "active" });
 
@@ -34,7 +33,7 @@ export const addToCart = async (req, res) => {
     if (existingProductIndex > -1) {
       const currentQty = Cart.products[existingProductIndex].quantity;
       const newQuantity = currentQty + 1;
-       if (newQuantity > product.stock) {
+      if (newQuantity > product.stock) {
         return res
           .status(400)
           .json({ message: "Not enough stock for this product" });
@@ -62,7 +61,7 @@ export const addToCart = async (req, res) => {
         "name shortdescription longdescription price category subCategory stock imageCover images ratingAvg createdAt updatedAt",
     });
 
-    res.status(200).json(  Cart);
+    res.status(200).json(Cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -102,7 +101,6 @@ export const deleteCart = async (req, res) => {
     Cart.products = Cart.products.filter(
       (p) => p.productId.toString() !== productId
     );
-
 
     Cart.totalPrice = Cart.products.reduce(
       (acc, item) => acc + item.quantity * item.price,
