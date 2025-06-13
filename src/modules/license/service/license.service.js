@@ -4,14 +4,14 @@ import LicenseModel from "../../../DB/model/license.model.js";
 import mongoose from 'mongoose';
 import { emailEvent } from "../../../utilis/events/email.event.js";
 
-import moment from 'moment'; // Make sure moment is installed: npm install moment
+import moment from 'moment'; 
+import { getDownloadUrl } from "../../../utilis/multer/downloadUrl.js";
 
 export const requestLicense = async (req, res) => {
   try {
     const {
       fullName,
       phoneNumber,
-
       email,
       address,
       experience,
@@ -22,12 +22,28 @@ export const requestLicense = async (req, res) => {
       workPlan,
     } = req.body;
 
-    const nationalId = req.files?.nationalId?.[0]?.path;
-    const documents = req.files?.documents?.map(file => file.path) || [];
+    const rawNationalId = req.files?.nationalId?.[0];
+    const rawDocuments = req.files?.documents || [];
 
-    if (!nationalId || documents.length === 0) {
+    if (!rawNationalId || rawDocuments.length === 0) {
       return res.status(400).json({ message: 'National ID and at least one document are required' });
     }
+
+    // Keep nationalId image path directly
+    const nationalId = rawNationalId.path;
+
+    // Convert PDF files to download URLs, others use path directly
+    const documents = rawDocuments.map(file => {
+      if (file.mimetype === 'application/pdf') {
+        // Extract Cloudinary public ID (remove file extension from path)
+        const publicId = file.filename; // Assumes Cloudinary uploaded with `public_id` = filename
+        const downloadUrl = getDownloadUrl(publicId, file.originalname);
+        return downloadUrl;
+      } else {
+        return file.path;
+      }
+    });
+
     const userId = req.user._id;
     const startOfMonth = moment().startOf('month').toDate();
     const endOfMonth = moment().endOf('month').toDate();
@@ -40,6 +56,7 @@ export const requestLicense = async (req, res) => {
     if (existingRequest) {
       return res.status(400).json({ message: 'You can only apply once per month' });
     }
+
     const newRequest = new LicenseModel({
       fullName,
       phoneNumber,
@@ -57,13 +74,16 @@ export const requestLicense = async (req, res) => {
     });
 
     await newRequest.save();
-    return res.status(201).json({ message: 'License application submitted successfully', data: newRequest });
+
+    return res.status(201).json({
+      message: 'License application submitted successfully',
+      data: newRequest
+    });
 
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error: error.message });
-  }};
-
-
+  }
+};
 export const getAllRequests = async (req, res) => {
     try {
     const requests = await LicenseModel.find();
