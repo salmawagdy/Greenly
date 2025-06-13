@@ -11,6 +11,7 @@ import wishlist from "./modules/wishList/wishList.controller.js";
 import payment from "./modules/payment/payment.controller.js"
 import loan from "./modules/loan/loan.controller.js"
 import webhook from "./modules/payment/webhook.controller.js"
+import address from "./modules/address/address.controller.js"
 
 import { globalErrorHandling } from "./utilis/response/error.response.js";
 
@@ -27,6 +28,7 @@ const bootstrap = async (app, express) => {
   app.use("/license", licenseController);
   app.use("/cart", cartRouter);
   app.use("/wishlist", wishlist);
+  app.use("/address", address)
 
   app.use("/payment", payment)
   app.use("/loan", loan)

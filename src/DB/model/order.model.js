@@ -26,6 +26,11 @@ const orderSchema = new Schema({
     enum: ["pending", "paid", "failed", "cancelled"],
     default: "pending",
   },
+  statusofpayment: {
+     type: String,
+  enum: ["pending", "shipment", "shipped"],
+  default: "pending",
+  },
  checkoutSessionId: { type: String },
   shippingAddress: {
     type: Object,

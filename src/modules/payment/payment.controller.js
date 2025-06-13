@@ -4,6 +4,7 @@ import {
   //handleStripeWebhook,
   getAllOrders,
   getSingleOrder,
+  updateOrderStatus,
 } from "./services/payment.services.js";
 import {
   authentication,
@@ -25,7 +26,6 @@ router.post(
   createCheckoutSession
 );
 
-
 router.get(
   "/allorders",
   authentication(),
@@ -37,6 +37,12 @@ router.get(
   authentication(),
   authorization(endpoint.paymentt),
   getSingleOrder
+);
+router.patch(
+  "/update-status/:orderId",
+  authentication(),
+  authorization(endpoint.adminn),
+  updateOrderStatus
 );
 
 export default router;

@@ -1,6 +1,9 @@
 import Stripe from "stripe";
 import Cart from "../../../DB/model/cartShopping.model.js";
 import Order from "../../../DB/model/order.model.js";
+import UserAddress from "../../../DB/model/addresses.model.js";
+
+
 const stripe = new Stripe(
   "sk_test_51RIsu6PcDaK4NqZIDd8y7NYBIf0qWGLAhTgQUouiIRQNHI9JjW1GZGVdLYpAK0kzgJK00diA1EBBQWGV7Hxuev0F00RS8Zn65M"
 );
@@ -17,7 +20,19 @@ export const createCheckoutSession = async (req, res) => {
     if (!cart || cart.products.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
-    const { address } = req.body;
+
+    const userId = req.user._id;
+    let address = req.body.address;
+    if (!address) {
+      const userAddresses = await UserAddress.findOne({ userId });
+      if (!userAddresses) return res.status(400).json({ message: "No address found" });
+
+      const defaultAddress = userAddresses.addresses.find(addr => addr.isDefault);
+      if (!defaultAddress) return res.status(400).json({ message: "No default address set" });
+
+      address = defaultAddress;
+    }
+    //const { address } = req.body;
     const phone = address.phone;
 
     const lineItems = cart.products.map((item) => ({
@@ -148,57 +163,30 @@ export const getSingleOrder = async (req, res) => {
   }
 };
 
-// export const createStripeOrder = async (req, res) => {
-//   try {
-//     const cart = await Cart.findOne({ userId: req.user._id, status: 'active' }).populate('products.productId');
-//     if (!cart || cart.products.length === 0) {
-//       return res.status(400).json({ message: 'Cart is empty' });
-//     }
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newStatus } = req.body;
+    const validStatuses = ["pending", "shipment", "shipped"];
+    if (!validStatuses.includes(newStatus)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
 
-//     // Create Stripe PaymentIntent
-//     const paymentIntent = await stripe.paymentIntents.create({
-//       amount: Math.round(cart.totalPrice * 100), // in cents
-//       currency: 'usd',
-//       metadata: { userId: req.user._id.toString() },
-//     });
+    const order = await Order.findById(id);
 
-//     // Create Order in DB (pending)
-//     const order = await Order.create({
-//       userId: req.user._id,
-//       products: cart.products,
-//       amount: cart.totalPrice,
-//       status: 'pending',
-//       stripePaymentIntentId: paymentIntent.id,
-//     });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-//     res.status(200).json({
-//       message: 'Stripe payment initiated',
-//       clientSecret: paymentIntent.client_secret,
-//       orderId: order._id,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-// export const stripeWebhook = async (req, res) => {
-//   const sig = req.headers['stripe-signature'];
+    order.status = status;
+    await order.save();
 
-//   let event;
-//   try {
-//     event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
-//   } catch (err) {
-//     return res.status(400).send(`Webhook Error: ${err.message}`);
-//   }
+    res.status(200).json({
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-//   if (event.type === 'payment_intent.succeeded') {
-//     const paymentIntent = event.data.object;
-
-//     const order = await Order.findOne({ stripePaymentIntentId: paymentIntent.id });
-//     if (order) {
-//       order.status = 'paid';
-//       await order.save();
-//     }
-//   }
-
-//   res.json({ received: true });
-// };
