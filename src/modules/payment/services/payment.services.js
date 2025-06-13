@@ -22,7 +22,7 @@ export const createCheckoutSession = async (req, res) => {
 
     const lineItems = cart.products.map((item) => ({
       price_data: {
-        currency: "usd",
+        currency: "gbp",
         product_data: {
           name: item.productId.name,
           description: item.productId.shortdescription,
@@ -36,8 +36,8 @@ export const createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel`,
+      success_url: `${process.env.CLIENT_URL}`,
+      cancel_url: `${process.env.CLIENT_URL}`,
       metadata: {
         userId: req.user._id.toString(),
         address: JSON.stringify(address),
