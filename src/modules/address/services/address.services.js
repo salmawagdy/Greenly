@@ -3,7 +3,18 @@ import mongoose from "mongoose";
 
 // ✅ Add Address
 export const addAddress = async (req, res) => {
-  const { city, state, street, building, floor, apartment, postalcode, isDefault } = req.body;
+  const {
+    city,
+    state,
+    street,
+    building,
+    floor,
+    apartment,
+    postalcode,
+    phone,
+    TYPE,
+    isDefault,
+  } = req.body;
   const userId = req.user._id;
 
   try {
@@ -18,6 +29,8 @@ export const addAddress = async (req, res) => {
       floor,
       apartment,
       postalcode,
+      phone,
+      TYPE,
       isDefault,
     };
 
@@ -83,7 +96,8 @@ export const getAddresses = async (req, res) => {
 export const getDefaultAddress = async (req, res) => {
   try {
     const userAddress = await addressesModel.findOne({ userId: req.user._id });
-    if (!userAddress) return res.status(404).json({ message: "No addresses found" });
+    if (!userAddress)
+      return res.status(404).json({ message: "No addresses found" });
 
     const defaultAddr = userAddress.addresses.find((addr) => addr.isDefault);
     if (!defaultAddr) {
@@ -102,10 +116,14 @@ export const setDefaultAddress = async (req, res) => {
 
   try {
     const userAddress = await addressesModel.findOne({ userId });
-    if (!userAddress) return res.status(404).json({ message: "User address not found" });
- console.log("UserID:", userId);
-console.log("AddressID from req:", addressId);
-console.log("Available addresses:", userAddress.addresses.map(a => a._id.toString()));
+    if (!userAddress)
+      return res.status(404).json({ message: "User address not found" });
+    console.log("UserID:", userId);
+    console.log("AddressID from req:", addressId);
+    console.log(
+      "Available addresses:",
+      userAddress.addresses.map((a) => a._id.toString())
+    );
     let found = false;
 
     // Loop through addresses and update default
@@ -122,7 +140,10 @@ console.log("Available addresses:", userAddress.addresses.map(a => a._id.toStrin
 
     await userAddress.save();
 
-    res.status(200).json({ message: "Default address updated successfully", addresses: userAddress.addresses });
+    res.status(200).json({
+      message: "Default address updated successfully",
+      addresses: userAddress.addresses,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
