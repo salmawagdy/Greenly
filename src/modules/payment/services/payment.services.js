@@ -25,15 +25,43 @@ export const createCheckoutSession = async (req, res) => {
     let address = req.body.address;
     if (!address) {
       const userAddresses = await UserAddress.findOne({ userId });
-      if (!userAddresses) return res.status(400).json({ message: "No address found" });
+      if (!userAddresses)
+        return res.status(400).json({ message: "No address found" });
 
-      const defaultAddress = userAddresses.addresses.find(addr => addr.isDefault);
-      if (!defaultAddress) return res.status(400).json({ message: "No default address set" });
+      const defaultAddress = userAddresses.addresses.find(
+        (addr) => addr.isDefault
+      );
+      if (!defaultAddress)
+        return res.status(400).json({ message: "No default address set" });
 
       address = defaultAddress;
     }
     //const { address } = req.body;
     const phone = address.phone;
+    if (req.body.address) {
+      const existingAddresses = await UserAddress.findOne({ userId });
+
+      const isDuplicate = existingAddresses?.addresses?.some(
+        (addr) =>
+          addr.street === address.street &&
+          addr.city === address.city &&
+          addr.country === address.country &&
+          addr.postalCode === address.postalCode
+      );
+
+      if (!isDuplicate) {
+        if (existingAddresses) {
+          existingAddresses.addresses.push({ ...address, isDefault: false });
+          await existingAddresses.save();
+        } else {
+          const newUserAddress = new UserAddress({
+            userId,
+            addresses: [{ ...address, isDefault: true }], // أول عنوان ندخله نخليه default
+          });
+          await newUserAddress.save();
+        }
+      }
+    }
 
     const lineItems = cart.products.map((item) => ({
       price_data: {
@@ -107,7 +135,7 @@ export const handleStripeWebhook = async (req, res) => {
       await order.save();
       const userId = order.userId;
 
-       for (const item of order.items) {
+      for (const item of order.items) {
         const product = await Product.findById(item.productId);
 
         if (product) {
@@ -204,4 +232,3 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
