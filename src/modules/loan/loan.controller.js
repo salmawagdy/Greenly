@@ -1,8 +1,9 @@
 import express from "express";
-import { authentication } from "../../middleware/auth.middleware.js";
+import { authentication , authorization} from "../../middleware/auth.middleware.js";
 import { getLoanPrediction } from "./services/loan.service.js";
 import loanModel from "../../DB/model/loan.model.js";
 import mongoose from "mongoose";
+import { endpoint } from "./loan.authorization.js";
 
 const router = express.Router();
 
@@ -79,3 +80,17 @@ router.get("/status/:id", authentication(), async (req, res) => {
 });
 
 export default router;
+router.get("/allLoans", authentication(),authorization(endpoint.getAll), async (req, res) => {
+  try {
+    const loans = await loanModel.find()
+      .populate("userId", "userName email") 
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(
+      loans,
+    );
+  } catch (error) {
+    console.error("Error fetching loans:", error.message);
+    res.status(500).json({ error: "Failed to fetch loans" });
+  }
+});
