@@ -139,11 +139,21 @@ export const updateCart = async (req, res) => {
       return res.status(404).json({ message: "Product not found in cart" });
     }
 
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     if (quantity <= 0) {
       Cart.products = Cart.products.filter(
         (item) => item.productId.toString() !== productId
       );
-    } else {
+    } else if (quantity > product.stock) {
+      return res
+        .status(400)
+        .json({ message: `Only ${product.stock} items in stock` });
+    }
+    else {
       productInCart.quantity = quantity;
     }
 
