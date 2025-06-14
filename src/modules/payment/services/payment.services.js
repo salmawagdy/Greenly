@@ -195,7 +195,7 @@ export const getAllOrders = async (req, res) => {
     const filter = user.role === "admin" ? {} : { userId: user._id };
 
     const orders = await Order.find(filter)
-      .populate("userId", "userName email")
+      .populate("userId", "userName email").populate("items.productId", "name")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -216,7 +216,7 @@ export const getSingleOrder = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id).populate("userId", "userName email");
+    const order = await Order.findById(id).populate("userId", "userName email", ).populate("items.productId", "name");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -224,7 +224,8 @@ export const getSingleOrder = async (req, res) => {
 
     res.status(200).json({
       message: "Order fetched successfully",
-      order,
+      order, 
+
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -235,7 +236,7 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { newStatus } = req.body;
-    const validStatuses = ["pending", "shipment", "shipped"];
+    const validStatuses = ["pending", "shipment", "delivered"];
     if (!validStatuses.includes(newStatus)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
