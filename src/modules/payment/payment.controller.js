@@ -29,7 +29,7 @@ router.post(
 router.get(
   "/allorders",
   authentication(),
-  authorization(endpoint.adminn),
+  authorization(endpoint.both),
   getAllOrders
 );
 router.get(

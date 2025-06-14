@@ -191,19 +191,27 @@ export const handleStripeWebhook = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
+    const user = req.user; 
+    const filter = user.role === "admin" ? {} : { userId: user._id };
+
+    const orders = await Order.find(filter)
       .populate("userId", "userName email")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
-      message: "All orders fetched successfully",
+      message: "Orders fetched successfully",
       count: orders.length,
       orders,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: "Failed to fetch orders",
+      error: error.message,
+    });
   }
 };
+
+
 export const getSingleOrder = async (req, res) => {
   try {
     const { id } = req.params;
