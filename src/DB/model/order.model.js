@@ -28,11 +28,11 @@ const orderSchema = new Schema({
     default: "pending",
   },
   statusofpayment: {
-     type: String,
-  enum: ["pending", "shipped", "delivered"],
-  default: "pending",
+    type: String,
+    enum: ["pending", "shipped", "delivered"],
+    default: "pending",
   },
- checkoutSessionId: { type: String },
+  checkoutSessionId: { type: String },
   shippingAddress: {
     type: Object,
     default: {},

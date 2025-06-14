@@ -191,11 +191,12 @@ export const handleStripeWebhook = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const user = req.user; 
+    const user = req.user;
     const filter = user.role === "admin" ? {} : { userId: user._id };
 
     const orders = await Order.find(filter)
-      .populate("userId", "userName email").populate("items.productId", "name")
+      .populate("userId", "userName email")
+      .populate("items.productId", "name")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -211,12 +212,13 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-
 export const getSingleOrder = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id).populate("userId", "userName email", ).populate("items.productId", "name");
+    const order = await Order.findById(id)
+      .populate("userId", "userName email")
+      .populate("items.productId", "name");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -224,8 +226,7 @@ export const getSingleOrder = async (req, res) => {
 
     res.status(200).json({
       message: "Order fetched successfully",
-      order, 
-
+      order,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
