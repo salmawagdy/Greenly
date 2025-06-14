@@ -9,7 +9,7 @@ const addressSchema = new Schema({
   apartment: { type: String, required: true },
   postalcode: { type: String, required: true },
   phone: { type: String, required: true },
-  TYPE: { type: String, required: true },
+  namee: { type: String, required: true },
   isDefault: { type: Boolean, default: false },
 });
 

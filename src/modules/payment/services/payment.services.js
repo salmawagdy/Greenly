@@ -40,27 +40,44 @@ export const createCheckoutSession = async (req, res) => {
     const phone = address.phone;
     if (req.body.address) {
       const existingAddresses = await UserAddress.findOne({ userId });
+      const formattedAddress = {
+        ...address,
+        isDefault: false, // أو true لو حابة تخليه الافتراضي
+      };
 
-      const isDuplicate = existingAddresses?.addresses?.some(
-        (addr) =>
-          addr.street === address.street &&
-          addr.city === address.city &&
-          addr.country === address.country &&
-          addr.postalCode === address.postalCode
-      );
+      if (existingAddresses) {
+        const isDuplicate = existingAddresses.addresses.some(
+          (addr) =>
+            addr.street === formattedAddress.street &&
+            addr.city === formattedAddress.city &&
+            addr.governorate === formattedAddress.governorate &&
+            addr.country === formattedAddress.country &&
+            addr.phone === formattedAddress.phone &&
+            addr.namee === formattedAddress.namee
+        );
 
-      if (!isDuplicate) {
-        if (existingAddresses) {
-          existingAddresses.addresses.push({ ...address, isDefault: false });
+        if (!isDuplicate) {
+          existingAddresses.addresses.push(formattedAddress);
           await existingAddresses.save();
-        } else {
-          const newUserAddress = new UserAddress({
-            userId,
-            addresses: [{ ...address, isDefault: true }], // أول عنوان ندخله نخليه default
-          });
-          await newUserAddress.save();
         }
+      } else {
+        const newAddresses = new UserAddress({
+          userId,
+          addresses: [formattedAddress],
+        });
+        await newAddresses.save();
       }
+      // if (existingAddresses) {
+      //   existingAddresses.addresses.push(formattedAddress);
+      //   await existingAddresses.save();
+      // }
+      // else {
+      //   const newAddresses = new UserAddress({
+      //     userId,
+      //     addresses: [formattedAddress],
+      //   });
+      //   await newAddresses.save();
+      // }
     }
 
     const lineItems = cart.products.map((item) => ({

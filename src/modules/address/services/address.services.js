@@ -12,7 +12,7 @@ export const addAddress = async (req, res) => {
     apartment,
     postalcode,
     phone,
-    TYPE,
+    namee,
     isDefault,
   } = req.body;
   const userId = req.user._id;
@@ -30,7 +30,7 @@ export const addAddress = async (req, res) => {
       apartment,
       postalcode,
       phone,
-      TYPE,
+      namee,
       isDefault,
     };
 
