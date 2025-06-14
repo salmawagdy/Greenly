@@ -236,7 +236,7 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { newStatus } = req.body;
-    const validStatuses = ["pending", "shipment", "delivered"];
+    const validStatuses = ["pending", "shipped", "delivered"];
     if (!validStatuses.includes(newStatus)) {
       return res.status(400).json({ message: "Invalid status value" });
     }

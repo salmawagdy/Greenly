@@ -13,7 +13,7 @@ const orderSchema = new Schema({
         ref: "Product",
         required: true,
       },
-      
+
       quantity: { type: Number, required: true },
       price: { type: Number, required: true },
     },
@@ -29,7 +29,7 @@ const orderSchema = new Schema({
   },
   statusofpayment: {
      type: String,
-  enum: ["pending", "shipment", "delivered"],
+  enum: ["pending", "shipped", "delivered"],
   default: "pending",
   },
  checkoutSessionId: { type: String },
