@@ -35,29 +35,26 @@ export const getWishlist = async (req, res) => {
     );
 
     if (!wishlist) {
-       wishlist = new Wishlist({ userId: req.user._id, products: [] });
+      wishlist = new Wishlist({ userId: req.user._id, products: [] });
       await wishlist.save();
-      res.status(200).json({ message: "Wishlist", wishlist });
-     
+      return res.status(200).json({ message: "Wishlist", wishlist }); // ✅ return added
     }
 
-    if(wishlist.products.length === 0 || !wishlist.products){
-      wishlist.products = []
-    }
-    else {
+    if (!wishlist.products || wishlist.products.length === 0) {
+      wishlist.products = [];
+    } else {
       wishlist.products = wishlist.products.filter((p) => p.productId !== null);
     }
 
-    
-   
-  
-    res
-      .status(200)
-      .json({ message: "Wishlist retrieved successfully", wishlist });
+    return res.status(200).json({
+      message: "Wishlist retrieved successfully",
+      wishlist,
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
+
 
 export const removeFromWishlist = async (req, res) => {
   try {
