@@ -73,8 +73,8 @@ export const getCart = async (req, res) => {
       .findOne({ userId: req.user._id, status: "active" })
       .populate("products.productId");
     if (!cartItems) {
-      // return res.status(404).json({ message: "Cart not found" });
-      return res.status(404).json({ products: [], totalPrice: 0 });
+      return res.status(404).json({ message: "Cart not found" });
+      // return res.status(404).json({ products: [], totalPrice: 0 });
     }
     res.status(200).json(cartItems);
   } catch (error) {
