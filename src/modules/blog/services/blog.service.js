@@ -79,11 +79,10 @@ export const deletePost = asyncHandler(async (req, res, next) => {
 
 
 
-export const getAllPosts = asyncHandler(async (req, res) => {
+export const getAllPosts = asyncHandler(async (req, res, next) => {
   const posts = await blogModel.find()
-    .sort({ createdAt: -1 }) 
-    .populate({ path: 'createdBy', select: 'userName' })
-    .populate({ path: 'replies.createdBy', select: 'userName' });
+    .populate({ path: 'createdBy', select: 'userName' }) 
+    .populate({ path: 'replies.createdBy', select: 'userName' }); 
 
   return successResponse({
     res,
@@ -91,6 +90,7 @@ export const getAllPosts = asyncHandler(async (req, res) => {
     data: posts,
   });
 });
+
 
 export const getUserPosts = asyncHandler(async (req, res, next) => {
     const { userId } = req.params;
