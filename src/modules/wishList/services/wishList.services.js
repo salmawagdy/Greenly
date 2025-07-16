@@ -37,7 +37,7 @@ export const getWishlist = async (req, res) => {
     if (!wishlist) {
       wishlist = new Wishlist({ userId: req.user._id, products: [] });
       await wishlist.save();
-      return res.status(200).json({ message: "Wishlist", wishlist }); // ✅ return added
+      return res.status(200).json({ message: "Wishlist", wishlist }); 
     }
 
     if (!wishlist.products || wishlist.products.length === 0) {
